@@ -1,8 +1,8 @@
 
 //---------------------------------------------------------
 /*
- 
  NHD-1.69-160128UGC3_ESP8266_Temp_Hum.ino
+ V 0.1
  
  Program for writing to Newhaven Display's 160x128 Graphic Color OLED with SEPS525 controller.
  
@@ -19,8 +19,6 @@
  
  Newhaven Display invests time and resources providing this open source code,
  please support Newhaven Display by purchasing products from Newhaven Display!
-
-
 */
 
 
@@ -34,7 +32,9 @@
 //---------------------------------------------------------
 
 #define DHTTYPE DHT22
-#define DHTPIN D6  //GPIO12 
+#define DHTPIN D6  //GPIO12  - Daten
+#define DHTVDD D7  //GPIO13  - VDD
+
 
 #define   SDI_PIN    2    // SDI (serial mode) signal connected to D4
 #define   SCL_PIN    0    // SCL (serial mdoe) signal connected to D3
@@ -49,23 +49,29 @@
 #define  BLACK  0x000000
 #define YELLOW  0x00FFEE
 
+// Drivinig_Current
+#define R10H 0x56         //Red
+#define G11H 0x4D         //Green
+#define B12H 0x46         //Blue
 
-const char* wifi_ssid     = "WiFi-SSID";
-const char* wifi_password = "WiFi-Password"; 
+#define SENSOR A0         // ADC Pin
+
+const char* wifi_ssid     = "...........";
+const char* wifi_password = "..........."; 
 unsigned long ulReqcount;
 unsigned long ulReconncount;
 
 //NTP
 /* Don't hardwire the IP address or we won't get the benefits of the pool.
  *  Lookup the IP address for the host name instead */
-
-IPAddress timeServerIP;				// time.nist.gov NTP server address
+//IPAddress timeServer(129, 6, 15, 28);        // time.nist.gov NTP server
+IPAddress timeServerIP;                        // time.nist.gov NTP server address
 const char* ntpServerName = "time.nist.gov";
-unsigned int localPort = 2390;			// local port to listen for UDP packets
-int gmt = 1;					// Zeitzone
-const int NTP_PACKET_SIZE = 48;			// NTP time stamp is in the first 48 bytes of the message
-byte packetBuffer[ NTP_PACKET_SIZE];		//buffer to hold incoming and outgoing packets
-unsigned long previousMillisNTP = 0;		// will store last NTP was read
+unsigned int localPort = 2390;                // local port to listen for UDP packets
+int gmt = 1;                                  // Zeitzone
+const int NTP_PACKET_SIZE = 48;               // NTP time stamp is in the first 48 bytes of the message
+byte packetBuffer[ NTP_PACKET_SIZE];          //buffer to hold incoming and outgoing packets
+unsigned long previousMillisNTP = 0;          // will store last NTP was read
 const long intervalNTP = 86400000;              // interval at which to sync Clock with NTP (86400000ms = 24h)
 
 // A UDP instance to let us send and receive packets over UDP
@@ -81,6 +87,7 @@ WiFiUDP udp;
 // This is for the ESP8266 processor on ESP-01 
 DHT dht(DHTPIN, DHTTYPE, 30);             // 11 works fine for ESP8266
 
+
 float humidity, temp_f;                   // Values read from sensor
 
 // Generally, you should use "unsigned long" for variables that hold time
@@ -88,12 +95,23 @@ unsigned long previousMillis = 0;        // will store last temp was read
 const long interval = 2000;              // interval at which to read sensor
 
 // MQTT-Client
-#define mqtt_server "192.168.0.xxx"    //FHEM-Server, MQTT-Server (Mosquitto)
+#define mqtt_server "192.168.xxx.xxx"    //FHEM-Server, MQTT-Server (Mosquitto)
 #define mqtt_user "mqtt_user"
-#define mqtt_password "mqtt_password"
-#define humidity_topic "fhem/Wohnzimmer/DHT22/Luftfeuchte"
-#define temperature_topic "fhem/Wohnzimmer/DHT22/Temperatur"
-#define switch_topic "fhem/Wohnzimmer/switch"
+#define mqtt_password "mqtt_pw"
+#define humidity_topic "fhem/Sensor/DHT22/Luftfeuchte"
+#define temperature_topic "fhem/Sensor/DHT22/Temperatur"
+#define display_topic "fhem/Display"
+#define BUFFER_SIZE 100
+char Display[10][6] = {{"clear"},
+                      {"clear"},
+                      {"clear"},
+                      {"clear"},
+                      {"clear"},
+                      {"clear"},
+                      {"clear"},
+                      {"clear"},
+                      {"clear"},
+                      {"clear"}};
 
 unsigned long previousMillisMQTT = 0;        // will store last MQTT was send
 float temp = 0.0;
@@ -106,7 +124,6 @@ void mqttCallback(char* topic, byte* payload, unsigned int length);
 // init MQTT-Client
 WiFiClient MQTTClient;
 PubSubClient mqttClient(mqtt_server, 1883, mqttCallback, MQTTClient);
-
 
 /*********************************/
 /******** FONT TABLE 5x8 *********/
@@ -1199,7 +1216,7 @@ void getNTPTime()
   }
 }
 
-// Fuehrende '0' bei mehrstelligen Zahlen ausgeben
+// Fuehrende '0' bei mmehrstelligen Zahlen ausgeben
 String printDigits(int digits)
 {
 // Utility function for digital clock display: prints leading 0
@@ -1283,37 +1300,7 @@ void WiFiStart()
   Serial.println(udp.localPort());
     
 }
-
-/*===============================*/
-/*============ WiFi =============*/
-/*=========== BEGIN =============*/
-/*===============================*/
   
-bool checkBound(float newValue, float prevValue, float maxDiff) {
-  return newValue < prevValue - maxDiff || newValue > prevValue + maxDiff;
-}
-
-void mqttReconnect() {
-  // Loop until we're reconnected
-  while (!mqttClient.connected()) {
-    Serial.print("Attempting MQTT connection...");
-    // Attempt to connect
-    // If you do not want to use a username and password, change next line to
-    // if (client.connect("ESP8266Client")) {
-    if (mqttClient.connect("ESP8266Client", mqtt_user, mqtt_password)) {
-      Serial.println("connected");
-      mqttClient.subscribe(strcat(switch_topic,"/#"));
-
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(mqttClient.state());
-      Serial.println(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      delay(5000);
-    }
-  }
-}
-
 /*===============================*/
 /*============ WiFi =============*/
 /*============= END =============*/
@@ -1326,34 +1313,79 @@ void mqttReconnect() {
 /*===============================*/
 
 
+
 // ===========================================================
 // Callback Funktion von MQTT. Die Funktion wird aufgerufen
 // wenn ein Wert empfangen wurde.
 // ===========================================================
-void mqttCallback(char* topic, byte* payload, unsigned int length) {
- // Zaehler
- int i = 0;
+void mqttCallback(char* topic, byte* payload, unsigned int length) 
+{
+  int i = 0;
+  char *ptr;
+  char message_buff[BUFFER_SIZE];
+ 
+   Serial.println("Message arrived: topic: " + String(topic));
+   Serial.println("Length: " + String(length,DEC));
+ 
+   // Kopieren der Nachricht und erstellen eines Bytes mit abschließender \0
+   for(i=0; i<length; i++) 
+   {
+     message_buff[i] = payload[i];
+   }
+   message_buff[i] = '\0';
+ 
+  // Konvertierung der nachricht in ein String
+  String msgString = String(message_buff);
+  Serial.println("Payload: " + msgString);
+  Serial.print("Payload message_buff[]: ");
+  Serial.println(message_buff);
 
- // Hilfsvariablen fuer die Convertierung der Nachricht in ein String
- char message_buff[100];
- 
- Serial.println("Message arrived: topic: " + String(topic));
- Serial.println("Length: " + String(length,DEC));
- 
- // Kopieren der Nachricht und erstellen eines Bytes mit abschlieÃŸender \0
- for(i=0; i<length; i++) {
- message_buff[i] = payload[i];
- }
- message_buff[i] = '\0';
- 
- // Konvertierung der nachricht in ein String
- String msgString = String(message_buff);
- Serial.println("Payload: " + msgString);
+  // Test auf Topic display_topic
+  if (strncmp(topic, display_topic, strlen(display_topic))==0) 
+  {
+    ptr = strrchr(topic, '/');
+    ptr++;
+    strcpy(Display[(int)*ptr-'0'], "     ");
 
-// if (String(msgString) == "on") digitalWrite(LEDPIN, 0);
-// if (String(msgString) == "off") digitalWrite(LEDPIN, 1);
- 
+    // Anhang an doslay_topic gibt Display for und darf nicht außerhaln 0...9 liegen
+    if ( (*ptr >= '0') && (*ptr <= '9'))
+      strcpy(Display[(int)*ptr-'0'], message_buff);
+  }
 } 
+
+
+void mqttReconnect() {
+  // Loop until we're reconnected
+  char mqttDisplayTopic[strlen(display_topic)+2];
+  while (!mqttClient.connected()) 
+  {
+    Serial.print("Attempting MQTT connection...");
+    // Attempt to connect
+    // If you do not want to use a username and password, change next line to
+    // if (client.connect("ESP8266Client")) {
+    if (WiFi.status() == WL_CONNECTED) 
+    {
+      if (!mqttClient.connected()) 
+      {
+        Serial.println("Connecting to MQTT server");
+        if (mqttClient.connect("ESP8266Client")) 
+        {
+          Serial.println("Connected to MQTT server");
+//          mqttClient.setCallback(mqttCallback);
+//          Serial.println("Set Callback to mqttCallback");
+          strcpy(mqttDisplayTopic,display_topic);
+          mqttClient.subscribe(strcat(mqttDisplayTopic,"/#"));
+          Serial.print("Set Subscribe to : ");
+          Serial.println(mqttDisplayTopic);
+        } else 
+        {
+          Serial.println("Could not connect to MQTT server");   
+        }
+   
+      }
+    }
+  }  
+}
 
 /*===============================*/
 /*============ MQTT =============*/
@@ -1364,6 +1396,10 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 /****** LOW LEVEL FUNCTIONS ******/
 /************* START *************/
 /*********************************/
+
+bool checkBound(float newValue, float prevValue, float maxDiff) {
+  return (newValue < prevValue - maxDiff || newValue > prevValue + maxDiff) && (newValue != NAN);
+}
 
 void OLED_Command_160128RGB(unsigned char c)        // send command to OLED
 {
@@ -1484,6 +1520,18 @@ void OLED_FillScreen_160128RGB(unsigned long color)    // fill screen with a giv
 }
 
 
+void OLED_Driving_Current_160128RGB(byte r10h, byte g11h, byte b12h)      //OLED initialization
+{
+    OLED_Command_160128RGB(0x10);     // Set Driving Current of Red
+    OLED_Data_160128RGB(r10h);        // Standard: 0x56
+
+    OLED_Command_160128RGB(0x11);     // Set Driving Current of Green
+    OLED_Data_160128RGB(g11h);        // Standard: 0x4D
+ 
+    OLED_Command_160128RGB(0x12);     // Set Driving Current of Blue
+    OLED_Data_160128RGB(b12h);        // Standard: 0x46
+}
+
 /*===============================*/
 /*===== LOW LEVEL FUNCTIONS =====*/
 /*============= END =============*/
@@ -1561,10 +1609,27 @@ void OLED_String2x_160128RGB(unsigned char x_pos, unsigned char y_pos, const cha
 
 void OLED_StringVerdana_160128RGB(unsigned char x_pos, unsigned char y_pos, const char array_of_string[], unsigned long textColor, unsigned long backgroundColor)  // function to show Number in Verdana
 {
+    char array_pos = 0; 
     for (int i=0;i < sizeof(array_of_string); i++)
-    {                      // Buchstabenabstand, Zeile, wenn Dezimalpunkt - dann andere Stelle in Font-Array abfrage, sonst Zahlenwert-Position  
-       OLED_Text_160128RGB(x_pos + i * 31, y_pos, (array_of_string[i]=='.') ? static_cast<int>(array_of_string[i]-32) : static_cast<int>(array_of_string[i]-48),  textColor, backgroundColor);
-       if (array_of_string[i]=='.') x_pos -= 16;
+    {                      // Buchstabenabstand, Zeile, wenn Dezimalpunkt - dann andere Stelle in Font-Array abfragen, sonst Zahlenwert-Position  
+       switch (array_of_string[i]) 
+       {
+         case ' ':
+            //do something when var equals 1
+            array_pos = 0;
+            break;
+         case '.':
+            //do something when var equals 2
+            array_pos = array_of_string[i]-32;
+            break;
+        default: 
+           // if nothing else matches, do the default
+           // default is optional
+           array_pos = array_of_string[i]-48;
+           break;
+     }
+     OLED_Text_160128RGB(x_pos + i * 31, y_pos, array_pos,  textColor, backgroundColor);
+     if (array_of_string[i]=='.') x_pos -= 16;
     }      
 }
 
@@ -1615,12 +1680,7 @@ void OLED_Init_160128RGB(void)      //OLED initialization
     OLED_Data_160128RGB(0x8C);
     OLED_Command_160128RGB(0x0D);// Set Pre-Charge Current of Blue
     OLED_Data_160128RGB(0x57);
-    OLED_Command_160128RGB(0x10);// Set Driving Current of Red
-    OLED_Data_160128RGB(0x56);
-    OLED_Command_160128RGB(0x11);// Set Driving Current of Green
-    OLED_Data_160128RGB(0x4D);
-    OLED_Command_160128RGB(0x12);// Set Driving Current of Blue
-    OLED_Data_160128RGB(0x46);
+    OLED_Driving_Current_160128RGB(R10H, G11H, B12H);      //OLED initialization
     OLED_Command_160128RGB(0x13);
     OLED_Data_160128RGB(0xA0); // Set Color Sequence
     OLED_Command_160128RGB(0x14);
@@ -1655,11 +1715,16 @@ void setup()
   // prepare GPIO LED
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
 
+  // prepare DHT VDD                // Wärem durch Strom  reduzieren
+  dht.begin();
+  pinMode(DHTVDD, OUTPUT);
+  digitalWrite(DHTVDD, HIGH);        // DHT /off
+
   // prepare GPIO for Display
-  pinMode(RS_PIN, OUTPUT);                        // configure RS_PIN as output
-  pinMode(RES_PIN, OUTPUT);                       // configure RES_PIN as output
-  pinMode(CS_PIN, OUTPUT);                        // configure CS_PIN as output 
-  digitalWrite(CS_PIN, HIGH);                     // set CS_PIN
+  pinMode(RS_PIN, OUTPUT);                     // configure RS_PIN as output
+  pinMode(RES_PIN, OUTPUT);                   // configure RES_PIN as output
+  pinMode(CS_PIN, OUTPUT);                    // configure CS_PIN as output 
+  digitalWrite(CS_PIN, HIGH);                 // set CS_PIN
   pinMode(SDI_PIN, OUTPUT);                   // configure SDI_PIN as output
   pinMode(SCL_PIN, OUTPUT);                   // configure SCL_PIN as output
   digitalWrite(SDI_PIN, LOW);                 // reset SDI_PIN
@@ -1681,13 +1746,17 @@ void setup()
 void loop() 
 {
   long now; 
-  char charNewTemp[5];
-  char charNewHum[5];
-  float newHum;
-  float newTemp;
+  char charNewTemp[5] = "00.0";
+  char charNewHum[5]  = "00.0";
+  char charDisplay[5]  = "00.0";
+  float newHum = 0.0;
+  float newTemp = 0.0;
   char charTime[5] ={0};
   char charDate[10] ={0};  
+  int sensor_value=0;
   
+    
+    strcpy(Display[1], "clear");
     OLED_Init_160128RGB();                           // initialize display
     OLED_FillScreen_160128RGB(BLACK);                // fill screen with black
 
@@ -1724,61 +1793,93 @@ void loop()
         strcat(charDate, printDigits(year()).c_str());
         OLED_String2x_160128RGB(20, 0, charDate , BLUE, BLACK);   // 0
 
-
-
-
-        
-        // Check if MQTT Server connect
+       
+        // Check if MQTT Server connected
         if (!mqttClient.connected()) 
         {
+           Serial.println("MQTT: Call Reconnect... ");
            mqttReconnect();      
+           Serial.println("MQTT: Connected");
         }
+
        
         // send temperature, humidity via MQTT
         now = millis();
-        if (now - previousMillisMQTT > 1000) 
+        if (now - previousMillisMQTT > 10000) 
         {
           previousMillisMQTT = now;
 
+          digitalWrite(DHTVDD, HIGH);                     // DHT on for read
+          delay(500);
           newTemp = dht.readTemperature(false);           // Read temperature if trus as Fahrenheit, if false as Celsius
           newHum = dht.readHumidity();                    // Read humidity (percent)
+          digitalWrite(DHTVDD, LOW);                      // DHT off for cool down
 
           if (checkBound(newTemp, temp, diff)) {
             temp = newTemp;
-            Serial.print("New temperature:");
+            Serial.print("New temperature: ");
             Serial.println(String(temp));
             mqttClient.publish(temperature_topic, String(temp).c_str(), true);
           }
 
           if (checkBound(newHum, hum, diff)) {
             hum = newHum;
-            Serial.print("New humidity:");
+            Serial.print("New humidity: ");
             Serial.println(String(hum));
             mqttClient.publish(humidity_topic, String(hum).c_str(), true);
           }  
         }
         mqttClient.loop();
-        
-        dtostrf(newTemp, 4, 1, charNewTemp);
 
+        // Read analog port A0 
+        sensor_value  = analogRead(SENSOR);
+        int x = (sensor_value*100/1023);
+        // Set Driving to OLED
+        OLED_Driving_Current_160128RGB(223 * x/100, 197 * x/100, 179 * x/100);      //OLED initialization
+
+        // Display Temerature
+        dtostrf(temp, 4, 1, charNewTemp);
         OLED_String2x_160128RGB(20, 100, "Temperatur " , BLUE, BLACK);   // 0
         OLED_StringVerdana_160128RGB(0, 80, charNewTemp, YELLOW, BLACK);   // 0
         OLED_Text_160128RGB(105, 80, 11, YELLOW, BLACK);   // ° - Abstand 28 (Zeichenbreite) + 8
         OLED_Text_160128RGB(129, 80, 10, YELLOW, BLACK);   // C - Abstand 28 (Zeichenbreite) + 8
 
         digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on (Note that LOW is the voltage level
-					  // but actually the LED is on; this is because 
-					  // it is acive low on the ESP-01)
-        delay(2000);                      (/ Wait for two second
+                                          // but actually the LED is on; this is because 
+                                          // it is acive low on the ESP-01)
+        delay(2000);                      // Wait for a second
 
-        dtostrf(newHum, 4, 1, charNewHum);
-        
+        // Display Humidity
+        dtostrf(hum, 4, 1, charNewHum);
         OLED_String2x_160128RGB(20, 100, "Luftfeuchte" , BLUE, BLACK);   // 0
         OLED_StringVerdana_160128RGB(0, 80, charNewHum, YELLOW, BLACK);   // 0
         OLED_Text_160128RGB(104, 80, 12, YELLOW, BLACK);   // % left - Abstand 28 (Zeichenbreite) + 8
         OLED_Text_160128RGB(131, 80, 13, YELLOW, BLACK);   // % right - Abstand 28 (Zeichenbreite) + 8
-        
+
         digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
         delay(2000);                      // Wait for two seconds (to demonstrate the active low LED)
+
+        for ( int i=0; i<10;i++)
+        {
+//          Serial.print("OLED:Dislpay ");
+//          Serial.print(i);
+//          Serial.print(": ");
+//          Serial.println(Display[i]);
+          if (strcmp(Display[i], "clear") !=0)
+          {
+            dtostrf(atof(Display[i]), 4, 1, charDisplay);
+            char str[1];
+            char topDisplay[10];
+            sprintf(str, "%d", i);
+            strcpy(topDisplay," Display ");
+            strcat(topDisplay,str);
+            strcat(topDisplay," ");
+            OLED_String2x_160128RGB(20, 100, topDisplay , BLUE, BLACK);   // 0
+            OLED_StringVerdana_160128RGB(0, 80, charDisplay, YELLOW, BLACK);   // 0
+            OLED_Text_160128RGB(105, 80, 11, YELLOW, BLACK);   // ° - Abstand 28 (Zeichenbreite) + 8
+            OLED_Text_160128RGB(129, 80, 10, YELLOW, BLACK);   // C - Abstand 28 (Zeichenbreite) + 8
+            delay(2000);                      // Wait for a second
+          }
+        }
     } 
 }
