@@ -95,7 +95,7 @@ unsigned long previousMillis = 0;        // will store last temp was read
 const long interval = 2000;              // interval at which to read sensor
 
 // MQTT-Client
-#define mqtt_server "192.168.0.150"    //FHEM-Server, MQTT-Server (Mosquitto)
+#define mqtt_server "192.168.xxx.xxx0"    //FHEM-Server, MQTT-Server (Mosquitto)
 #define mqtt_user "mqtt_user"
 #define mqtt_password "mqtt_pw"
 #define humidity_topic "fhem/Sensor/DHT22/Luftfeuchte"
