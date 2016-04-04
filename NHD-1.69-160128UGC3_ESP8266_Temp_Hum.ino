@@ -55,8 +55,8 @@
 
 #define SENSOR A0         // ADC Pin
 
-const char* wifi_ssid     = "...........";
-const char* wifi_password = "..........."; 
+const char* wifi_ssid     = "FritzBox7390";
+const char* wifi_password = "1qVz37OuA75"; 
 unsigned long ulReqcount;
 unsigned long ulReconncount;
 
@@ -95,14 +95,14 @@ unsigned long previousMillis = 0;        // will store last temp was read
 const long interval = 2000;              // interval at which to read sensor
 
 // MQTT-Client
-#define mqtt_server "192.168.xxx.xxx0"    //FHEM-Server, MQTT-Server (Mosquitto)
+#define mqtt_server "192.168.0.150"    //FHEM-Server, MQTT-Server (Mosquitto)
 #define mqtt_user "mqtt_user"
-#define mqtt_password "mqtt_pw"
-#define humidity_topic "fhem/Sensor/DHT22/Luftfeuchte"
-#define temperature_topic "fhem/Sensor/DHT22/Temperatur"
-#define display_topic "fhem/Display"
+#define mqtt_password "014802"
+#define humidity_topic "fhem/Spitzboden/DHT22/Luftfeuchte"
+#define temperature_topic "fhem/Spitzboden/DHT22/Temperatur"
+#define display_topic "fhem/Spitzboden/Display"
 #define BUFFER_SIZE 100
-char Display[10][6] = {{"clear"},
+char Display[11][6] = {{"clear"},
                       {"clear"},
                       {"clear"},
                       {"clear"},
@@ -111,12 +111,15 @@ char Display[10][6] = {{"clear"},
                       {"clear"},
                       {"clear"},
                       {"clear"},
-                      {"clear"}};
+                      {"clear"},
+                      {"clear"}               // Display Helligkeit
+                      };
 
 unsigned long previousMillisMQTT = 0;        // will store last MQTT was send
 
 // init MQTT-Client
 WiFiClient MQTTClient;
+void mqttCallback(char* topic, byte* payload, unsigned int length); 
 PubSubClient mqttClient(mqtt_server, 1883, mqttCallback, MQTTClient);
 
 /*********************************/
