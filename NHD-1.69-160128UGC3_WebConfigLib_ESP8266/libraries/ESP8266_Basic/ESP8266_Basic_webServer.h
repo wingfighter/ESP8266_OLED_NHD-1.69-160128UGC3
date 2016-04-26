@@ -23,12 +23,17 @@
   #include <DNSServer.h>
   #include <ESP8266HTTPUpdateServer.h>
   #include <ESP8266httpUpdate.h>
+  #include <FS.h>
+
+  #define DBG_OUTPUT_PORT Serial
+  #define GPIO2 2
+
 
   #include "ESP8266_Basic_data.h"
   #include <functional>
   typedef std::function<void(void)> CallbackFunction;
-  
-  #define GPIO2 2
+//  using namespace std::placeholders;
+
 
 class ESP8266_Basic_webServer{
 public:
@@ -47,6 +52,7 @@ private:
   CallbackFunction saveConfig_Callback;
   CFG *cfg;
   MyScreen *oled;
+  File fsUploadFile;
   //Page controls----------------
   void rootPageHandler();
   void sensorPageHandler();
@@ -55,8 +61,17 @@ private:
   void gpioPageHandler();
   void cfgPageHandler();
   void handleNotFound();
+/*  bool handleFileRead(String path);
+  void handleFileUpload();
+  void handleFileDelete();
+  void handleFileCreate();
+  void handleFileList();
+*/
 
   //helpers----------------------------
   String IPtoString(IPAddress ip);
+//  String formatBytes(size_t bytes);
+//  String getContentType(String filename);
+
 };
 

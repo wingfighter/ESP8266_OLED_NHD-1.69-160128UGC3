@@ -47,18 +47,26 @@ Topics::Topics(){
    ¦  ¦  +-[102] Update Firmware   
    ¦     
    ¦-[2] Display
-   ¦  ¦-[10] NHD 1.69
-   ¦  ¦  ¦-[100] Screen 0
-   ¦  ¦  +-[101] Screen 1   
-   ¦  ¦  +-[102] Screen 2   
-   ¦  ¦  +-[103] Screen 3   
-   ¦  ¦  +-[104] Screen 4   
-   ¦  ¦  +-[105] Screen 5   
-   ¦  ¦  +-[106] Screen 6   
-   ¦  ¦  +-[107] Screen 7   
-   ¦  ¦  +-[108] Screen 8   
-   ¦  ¦  +-[109] Screen 9   
+   ¦  ¦-[20] NHD 1.69
+   ¦  ¦  ¦-[200] Screen 0
+   ¦  ¦  +-[201] Screen 1   
+   ¦  ¦  +-[202] Screen 2   
+   ¦  ¦  +-[203] Screen 3   
+   ¦  ¦  +-[204] Screen 4   
+   ¦  ¦  +-[205] Screen 5   
+   ¦  ¦  +-[206] Screen 6   
+   ¦  ¦  +-[207] Screen 7   
+   ¦  ¦  +-[208] Screen 8   
+   ¦  ¦  +-[209] Screen 9   
    ¦     
+   ¦-[3] Warther
+   ¦  ¦-[30] Forecast
+   ¦  ¦  ¦-[300] Day 0
+   ¦  ¦  +-[301] Day 1   
+   ¦  ¦  +-[302] Day 2   
+   ¦  ¦  +-[303] Day 3   
+   ¦  ¦  +-[304] Day 4   
+   ¦  ¦  +-[305] Day 5   
    ¦     
 */
 
@@ -104,14 +112,23 @@ Topics::Topics(){
   sub.E3.item[2][0][7] = "Screen_7";
   sub.E3.item[2][0][8] = "Screen_8";
   sub.E3.item[2][0][9] = "Screen_9";
-  
-  sub.E1.item[3] = "File";
-  sub.E2.item[3][0] = "Read";
-  sub.E3.item[3][0][0] = "Field_01";
-  sub.E3.item[3][0][1] = "Field_02";
-  sub.E2.item[3][1] = "Write";
-  sub.E3.item[3][1][0] = "Field_01";
-  sub.E3.item[3][1][1] = "Field_02";
+
+  sub.E1.item[3] = "Weather";
+  sub.E2.item[3][0] = "Forecast";
+  sub.E3.item[3][0][0] = "Day_0";
+  sub.E3.item[3][0][1] = "Day_1";
+  sub.E3.item[3][0][2] = "Day_2";
+  sub.E3.item[3][0][3] = "Day_3";
+  sub.E3.item[3][0][4] = "Day_4";
+  sub.E3.item[3][0][5] = "Day_5";
+
+  sub.E1.item[4] = "File";
+  sub.E2.item[4][0] = "Read";
+  sub.E3.item[4][0][0] = "Field_01";
+  sub.E3.item[4][0][1] = "Field_02";
+  sub.E2.item[4][1] = "Write";
+  sub.E3.item[4][1][0] = "Field_01";
+  sub.E3.item[4][1][1] = "Field_02";
 
 /* MQTT publish TopicTree struct   !!define TreeDepht in .h!!!
   [x] mqttDeviceName 

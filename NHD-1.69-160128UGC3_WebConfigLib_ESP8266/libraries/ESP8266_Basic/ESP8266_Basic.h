@@ -61,6 +61,7 @@ public:
   WiFiUDP udp;  
   Topics topic;
   MyScreen MyOLEDDisplay[10];
+  WeatherIcon MyWeatherIcon[5]; // Max. six days
   CFG cfg;
   void start_WiFi_connections();
   void handle_connections();

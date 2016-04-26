@@ -160,17 +160,33 @@ void ESP8266_Basic::mqttBroker_Callback(char* topic, byte* payload, unsigned int
   	   if (dissectResult.itemPath == subOLEDTopic )
 	   {
 	      //Store MQTT Payload to MyScreen struct
-	      for (int j=0; j < 6 ; j++ )
+	      for (int j=0; j < 6 ; j++ ) // -99.9/0
 		  {
 		 	MyOLEDDisplay[i].Screen[j] = value[j];
 		  }
-   char buffer[30];
-   sprintf(buffer, "with %%p:  MyOLEDDisplay[%i].Screen    = %p\n", i, &MyOLEDDisplay[i].Screen);
-   Serial.print(buffer);
-
-
+//   char buffer[30];
+//   sprintf(buffer, "with %%p:  MyOLEDDisplay[%i].Screen    = %p\n", i, &MyOLEDDisplay[i].Screen);
+//   Serial.print(buffer);
 		}
 	 }
+
+	// Weather Icon - Code from Yahoo
+	char subCodeTopic[6] = "3/0/";  //Search for recieved screen 3/0/0-3/0/5
+	for (int i = 0; i < 6; i++ )
+	{
+	   subCodeTopic[4] = i + '0';   
+  	   if (dissectResult.itemPath == subCodeTopic )
+	   {
+	      //Store MQTT Payload to WeatherIcon struct
+	      for (int j=0; j < 4 ; j++ )  // Two digits from Yahoo Weather-Code + /0
+		  {
+		 	MyWeatherIcon[i].weatherCode[j] = value[j];
+		  }
+		}
+	 }
+  
+  
+  
   }
 }
 
@@ -373,7 +389,7 @@ bool WiFiOK = false;
   Serial.println();
   Serial.print("Connecting WiFi to: ");
   Serial.println(cfg.wifiSSID);
-   
+  
   WiFi.begin(cfg.wifiSSID, cfg.wifiPSK);
 
   int i = 0;
@@ -533,6 +549,7 @@ void ESP8266_Basic::resetSettings(){
 //===============================================================================
 //  FileSystem
 //===============================================================================
+
 
 //My File
 //===> read from MyFile <-------------------------------------------------

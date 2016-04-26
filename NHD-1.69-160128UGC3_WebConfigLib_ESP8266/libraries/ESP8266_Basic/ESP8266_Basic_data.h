@@ -44,9 +44,9 @@
   };
   
 //subscribe struct
-  const int sub_e1 = 4;			//define TreeDepht here!!!
+  const int sub_e1 = 5;			//define TreeDepht here!!!
   const int sub_e2 = 5;
-  const int sub_e3 = 4;
+  const int sub_e3 = 9;
   const int sub_e4 = 0;
   
   typedef struct Tsub_topicE1{
@@ -143,5 +143,10 @@ private:
 	 char mesurementUnit[3] = "*C"; 
  };
  
+ //WeatherIcon sruct
+ typedef struct WeatherIcon{
+	 char weatherCode[3] = "99";
+	 char forecastDay[14] = "today";
+ };
 
   
