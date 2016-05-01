@@ -235,7 +235,7 @@ void ESP8266_Basic_webServer::sensorPageHandler(){
   "<b><h1>ESP8266 Configuration</h1></b>";
 
   rm += ""
-  "<font size='-2'>&copy; by Pf@nne/16   |   " + String(cfg->version) + "</font>"
+  "<font size='-2'>&copy; 2016   |   " + String(cfg->version) + "</font>"
   "</body bgcolor> </body></font>"
   "</html>"  
   ;
@@ -411,7 +411,7 @@ void ESP8266_Basic_webServer::rootPageHandler()
 
   "</table>"
 
-  "<font size='-2'>&copy; by Pf@nne/16   |   " + String(cfg->version) + "</font>"
+  "<font size='-2'>&copy; 2016   |   " + String(cfg->version) + "</font>"
   "</body bgcolor> </body></font>"
   "</html>"  
   ;
@@ -550,24 +550,36 @@ void ESP8266_Basic_webServer::screenConfigHandler()
   // Check if there are any GET parameters
   if (webServer.hasArg("webNameScreen0")) strcpy(cfg->webNameScreen0, webServer.arg("webNameScreen0").c_str());
   if (webServer.hasArg("webUnitScreen0")) strcpy(cfg->webUnitScreen0, webServer.arg("webUnitScreen0").c_str());
+  if (webServer.hasArg("webDurationScreen0")) strcpy(cfg->webDurationScreen0, webServer.arg("webDurationScreen0").c_str());
   if (webServer.hasArg("webNameScreen1")) strcpy(cfg->webNameScreen1, webServer.arg("webNameScreen1").c_str());
   if (webServer.hasArg("webUnitScreen1")) strcpy(cfg->webUnitScreen1, webServer.arg("webUnitScreen1").c_str());
+  if (webServer.hasArg("webDurationScreen1")) strcpy(cfg->webDurationScreen1, webServer.arg("webDurationScreen1").c_str());
   if (webServer.hasArg("webNameScreen2")) strcpy(cfg->webNameScreen2, webServer.arg("webNameScreen2").c_str());
   if (webServer.hasArg("webUnitScreen2")) strcpy(cfg->webUnitScreen2, webServer.arg("webUnitScreen2").c_str());
+  if (webServer.hasArg("webDurationScreen2")) strcpy(cfg->webDurationScreen2, webServer.arg("webDurationScreen2").c_str());
   if (webServer.hasArg("webNameScreen3")) strcpy(cfg->webNameScreen3, webServer.arg("webNameScreen3").c_str());
   if (webServer.hasArg("webUnitScreen3")) strcpy(cfg->webUnitScreen3, webServer.arg("webUnitScreen3").c_str());
+  if (webServer.hasArg("webDurationScreen3")) strcpy(cfg->webDurationScreen3, webServer.arg("webDurationScreen3").c_str());
   if (webServer.hasArg("webNameScreen4")) strcpy(cfg->webNameScreen4, webServer.arg("webNameScreen4").c_str());
   if (webServer.hasArg("webUnitScreen4")) strcpy(cfg->webUnitScreen4, webServer.arg("webUnitScreen4").c_str());
+  if (webServer.hasArg("webDurationScreen4")) strcpy(cfg->webDurationScreen4, webServer.arg("webDurationScreen4").c_str());
   if (webServer.hasArg("webNameScreen5")) strcpy(cfg->webNameScreen5, webServer.arg("webNameScreen5").c_str());
   if (webServer.hasArg("webUnitScreen5")) strcpy(cfg->webUnitScreen5, webServer.arg("webUnitScreen5").c_str());
+  if (webServer.hasArg("webDurationScreen5")) strcpy(cfg->webDurationScreen5, webServer.arg("webDurationScreen5").c_str());
   if (webServer.hasArg("webNameScreen6")) strcpy(cfg->webNameScreen6, webServer.arg("webNameScreen6").c_str());
   if (webServer.hasArg("webUnitScreen6")) strcpy(cfg->webUnitScreen6, webServer.arg("webUnitScreen6").c_str());
+  if (webServer.hasArg("webDurationScreen6")) strcpy(cfg->webDurationScreen6, webServer.arg("webDurationScreen6").c_str());
   if (webServer.hasArg("webNameScreen7")) strcpy(cfg->webNameScreen7, webServer.arg("webNameScreen7").c_str());
   if (webServer.hasArg("webUnitScreen7")) strcpy(cfg->webUnitScreen7, webServer.arg("webUnitScreen7").c_str());
+  if (webServer.hasArg("webDurationScreen7")) strcpy(cfg->webDurationScreen7, webServer.arg("webDurationScreen7").c_str());
   if (webServer.hasArg("webNameScreen8")) strcpy(cfg->webNameScreen8, webServer.arg("webNameScreen8").c_str());
   if (webServer.hasArg("webUnitScreen8")) strcpy(cfg->webUnitScreen8, webServer.arg("webUnitScreen8").c_str());
+  if (webServer.hasArg("webDurationScreen8")) strcpy(cfg->webDurationScreen8, webServer.arg("webDurationScreen8").c_str());
   if (webServer.hasArg("webNameScreen9")) strcpy(cfg->webNameScreen9, webServer.arg("webNameScreen9").c_str());
   if (webServer.hasArg("webUnitScreen9")) strcpy(cfg->webUnitScreen9, webServer.arg("webUnitScreen9").c_str());
+  if (webServer.hasArg("webDurationScreen9")) strcpy(cfg->webDurationScreen9, webServer.arg("webDurationScreen9").c_str());
+
+/*
 
    char buffer[30];
 
@@ -644,6 +656,7 @@ void ESP8266_Basic_webServer::screenConfigHandler()
   "			<td style='width: 192px;'>Name</td>"
   "			<td>aktueller Wert</td>"
   "			<td>Einheit</td>"
+  "			<td>Dauer</td>"
   "		</tr>"
 
   "		<tr>"
@@ -651,6 +664,7 @@ void ESP8266_Basic_webServer::screenConfigHandler()
   "			<td style='width: 192px;'>Temperatur</td>"
   "			<td>" + String(oled[4].Screen) + "</td>"
   "			<td>*C</td>"
+  "			<td><input id='webDurationScreen4' name='webDurationScreen4' value='" + String(cfg->webDurationScreen4) + "' size='2' maxlength='2' placeholder='2' type='text'></td>"
   "		</tr>"
 
   "		<tr>"
@@ -658,6 +672,7 @@ void ESP8266_Basic_webServer::screenConfigHandler()
   "			<td style='width: 192px;'>Luftfeuchte</td>"
   "			<td>" + String(oled[5].Screen) + "</td>"
   "			<td>%</td>"
+  "			<td><input id='webDurationScreen5' name='webDurationScreen5' value='" + String(cfg->webDurationScreen5) + "' size='2' maxlength='2' placeholder='2' type='text'></td>"
   "		</tr>"
 
   "		<tr>"
@@ -665,6 +680,7 @@ void ESP8266_Basic_webServer::screenConfigHandler()
   "			<td style='width: 192px;'><input id='webNameScreen0' name='webNameScreen0' value='" + String(cfg->webNameScreen0) + "' size='13' maxlength='13' placeholder='Name Screen 0' type='text'></td>"
   "			<td>" + String(oled[0].Screen) + "</td>"
   "			<td><input id='webUnitScreen0' name='webUnitScreen0' value='" + String(cfg->webUnitScreen0) + "' size='2' maxlength='2' placeholder='*C' type='text'></td>"
+  "			<td><input id='webDurationScreen0' name='webDurationScreen0' value='" + String(cfg->webDurationScreen0) + "' size='2' maxlength='2' placeholder='2' type='text'></td>"
   "		</tr>"
 
   "		<tr>"
@@ -672,6 +688,7 @@ void ESP8266_Basic_webServer::screenConfigHandler()
   "			<td style='width: 192px;'><input id='webNameScreen1' name='webNameScreen1' value='" + String(cfg->webNameScreen1) + "' size='13' maxlength='13' placeholder='Name Screen 1' type='text'></td>"
   "			<td>" + String(oled[1].Screen) + "</td>"
   "			<td><input id='webUnitScreen1' name='webUnitScreen1' value='" + String(cfg->webUnitScreen1) + "' size='2' maxlength='2' placeholder='*C' type='text'></td>"
+  "			<td><input id='webDurationScreen1' name='webDurationScreen1' value='" + String(cfg->webDurationScreen1) + "' size='2' maxlength='2' placeholder='2' type='text'></td>"
   "		</tr>"
 
   "		<tr>"
@@ -679,6 +696,7 @@ void ESP8266_Basic_webServer::screenConfigHandler()
   "			<td style='width: 192px;'><input id='webNameScreen2' name='webNameScreen2' value='" + String(cfg->webNameScreen2) + "' size='13' maxlength='13' placeholder='Name Screen 2' type='text'></td>"
   "			<td>" + String(oled[2].Screen) + "</td>"
   "			<td><input id='webUnitScreen2' name='webUnitScreen2' value='" + String(cfg->webUnitScreen2) + "' size='2' maxlength='2' placeholder='*C' type='text'></td>"
+  "			<td><input id='webDurationScreen2' name='webDurationScreen2' value='" + String(cfg->webDurationScreen2) + "' size='2' maxlength='2' placeholder='2' type='text'></td>"
   "		</tr>"
 
   "		<tr>"
@@ -686,12 +704,14 @@ void ESP8266_Basic_webServer::screenConfigHandler()
   "			<td style='width: 192px;'><input id='webNameScreen3' name='webNameScreen3' value='" + String(cfg->webNameScreen3) + "' size='13' maxlength='13' placeholder='Name Screen 3' type='text'></td>"
   "			<td>" + String(oled[3].Screen) + "</td>"
   "			<td><input id='webUnitScreen3' name='webUnitScreen3' value='" + String(cfg->webUnitScreen3) + "' size='2' maxlength='2' placeholder='*C' type='text'></td>"
+  "			<td><input id='webDurationScreen3' name='webDurationScreen3' value='" + String(cfg->webDurationScreen3) + "' size='2' maxlength='2' placeholder='2' type='text'></td>"
   "		</tr>"
 
   "		<tr>"
   "			<td></td>"
   "			<td style='width: 192px;'><input value='Configuration sichern' style='height: 30px; width: 200px;' type='submit'> </td>"
   "			<td></td>"  
+  "			<td></td>"
   "			<td></td>"
   "		</tr>"
 
@@ -700,11 +720,12 @@ void ESP8266_Basic_webServer::screenConfigHandler()
   "			<td style='width: 192px;'><input onclick=\"location.href='./'\" value='Homepage' style='height: 30px; width: 200px;' type='button'> </td>"
   "			<td></td>"  
   "			<td></td>"
+  "			<td></td>"
   "		</tr>"
   "</tbody>"
   "</table>"
   "</form>"
-  "<font size='-2'>&copy; by Pf@nne/16   |   " + String(cfg->version) + "</font>"
+  "<font size='-2'>&copy; 2016   |   " + String(cfg->version) + "</font>"
   "</body>"
   "</html>"
   ;

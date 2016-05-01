@@ -14,7 +14,7 @@
 
 ********************************************************************************/
 #pragma once
-#define Version "ESP_Basic alpha V0.200"
+#define Version "ESP_Basic by Pf@nne V0.200/winfighter V0.32"
  
   typedef char* topicField; 
 
@@ -80,7 +80,7 @@ private:
 
 // Config struct
   typedef struct CFG{
-    char version[25] = Version;
+    char version[45] = Version;
     char webUser[40];
     char webPassword[40];
     char apName[40];
@@ -96,24 +96,35 @@ private:
 	char filePath[40];
     char webNameScreen0[14];
     char webUnitScreen0[3];
+    char webDurationScreen0[3];
     char webNameScreen1[14];
     char webUnitScreen1[3];
+    char webDurationScreen1[3];
     char webNameScreen2[14];
     char webUnitScreen2[3];
+    char webDurationScreen2[3];
     char webNameScreen3[14];
     char webUnitScreen3[3];
+    char webDurationScreen3[3];
     char webNameScreen4[14];
     char webUnitScreen4[3];
+    char webDurationScreen4[3];
     char webNameScreen5[14];
     char webUnitScreen5[3];
+    char webDurationScreen5[3];
     char webNameScreen6[14];
     char webUnitScreen6[3];
+    char webDurationScreen6[3];
     char webNameScreen7[14];
     char webUnitScreen7[3];
+    char webDurationScreen7[3];
     char webNameScreen8[14];
     char webUnitScreen8[3];
+    char webDurationScreen8[3];
     char webNameScreen9[14];
     char webUnitScreen9[3];
+    char webDurationScreen9[3];
+
   };
   
 
@@ -141,6 +152,7 @@ private:
 	 char Screen[6] = "clear";
 	 char topRow[14] = "--Display n--";
 	 char mesurementUnit[3] = "*C"; 
+	 char duration[3] = "2";
  };
  
  //WeatherIcon sruct

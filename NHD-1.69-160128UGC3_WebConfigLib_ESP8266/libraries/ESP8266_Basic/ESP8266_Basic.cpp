@@ -524,25 +524,35 @@ void ESP8266_Basic::resetSettings(){
   strcpy(cfg.filePath, "");
   strcpy(cfg.webNameScreen0, "");
   strcpy(cfg.webUnitScreen0, "");
+  strcpy(cfg.webDurationScreen0, "");
   strcpy(cfg.webNameScreen1, "");
   strcpy(cfg.webUnitScreen1, "");
+  strcpy(cfg.webDurationScreen1, "");
   strcpy(cfg.webNameScreen2, "");
   strcpy(cfg.webUnitScreen2, "");
+  strcpy(cfg.webDurationScreen2, "");
   strcpy(cfg.webNameScreen3, "");
   strcpy(cfg.webUnitScreen3, "");
+  strcpy(cfg.webDurationScreen3, "");
   strcpy(cfg.webNameScreen4, "");
   strcpy(cfg.webUnitScreen4, "");
+  strcpy(cfg.webDurationScreen4, "");
   strcpy(cfg.webNameScreen5, "");
   strcpy(cfg.webUnitScreen5, "");
+  strcpy(cfg.webDurationScreen5, "");
   strcpy(cfg.webNameScreen6, "");
   strcpy(cfg.webUnitScreen6, "");
+  strcpy(cfg.webDurationScreen6, "");
   strcpy(cfg.webNameScreen7, "");
   strcpy(cfg.webUnitScreen7, "");
+  strcpy(cfg.webDurationScreen7, "");
   strcpy(cfg.webNameScreen8, "");
   strcpy(cfg.webUnitScreen8, "");
+  strcpy(cfg.webDurationScreen8, "");
   strcpy(cfg.webNameScreen9, "");
   strcpy(cfg.webUnitScreen9, "");
-  
+  strcpy(cfg.webDurationScreen9, "");
+
   write_cfgFile();
 }
 
@@ -655,6 +665,8 @@ bool ESP8266_Basic::read_cfgFile(){
     if (SPIFFS.exists("/config.json")) {
       //file exists, reading and loading
       Serial.println("reading config file");
+//	  SPIFFS.remove("/config.json");
+//      return readOK;
       File cfgFile = SPIFFS.open("/config.json", "r");
       if (cfgFile) {
         Serial.println("opened config file");
@@ -684,26 +696,35 @@ bool ESP8266_Basic::read_cfgFile(){
           strcpy(cfg.filePath, json["filePath"]);
           strcpy(cfg.webNameScreen0, json["webNameScreen0"]);
           strcpy(cfg.webUnitScreen0, json["webUnitScreen0"]);
+          strcpy(cfg.webDurationScreen0, json["webDurationScreen0"]);
           strcpy(cfg.webNameScreen1, json["webNameScreen1"]);
           strcpy(cfg.webUnitScreen1, json["webUnitScreen1"]);
+          strcpy(cfg.webDurationScreen1, json["webDurationScreen1"]);
           strcpy(cfg.webNameScreen2, json["webNameScreen2"]);
           strcpy(cfg.webUnitScreen2, json["webUnitScreen2"]);
+          strcpy(cfg.webDurationScreen2, json["webDurationScreen2"]);
           strcpy(cfg.webNameScreen3, json["webNameScreen3"]);
           strcpy(cfg.webUnitScreen3, json["webUnitScreen3"]);
+          strcpy(cfg.webDurationScreen3, json["webDurationScreen3"]);
           strcpy(cfg.webNameScreen4, json["webNameScreen4"]);
           strcpy(cfg.webUnitScreen4, json["webUnitScreen4"]);
+          strcpy(cfg.webDurationScreen4, json["webDurationScreen4"]);
           strcpy(cfg.webNameScreen5, json["webNameScreen5"]);
           strcpy(cfg.webUnitScreen5, json["webUnitScreen5"]);
+          strcpy(cfg.webDurationScreen5, json["webDurationScreen5"]);
           strcpy(cfg.webNameScreen6, json["webNameScreen6"]);
           strcpy(cfg.webUnitScreen6, json["webUnitScreen6"]);
+          strcpy(cfg.webDurationScreen6, json["webDurationScreen6"]);
           strcpy(cfg.webNameScreen7, json["webNameScreen7"]);
           strcpy(cfg.webUnitScreen7, json["webUnitScreen7"]);
+          strcpy(cfg.webDurationScreen7, json["webDurationScreen7"]);
           strcpy(cfg.webNameScreen8, json["webNameScreen8"]);
           strcpy(cfg.webUnitScreen8, json["webUnitScreen8"]);
+          strcpy(cfg.webDurationScreen8, json["webDurationScreen8"]);
           strcpy(cfg.webNameScreen9, json["webNameScreen9"]);
           strcpy(cfg.webUnitScreen9, json["webUnitScreen9"]);
+          strcpy(cfg.webDurationScreen9, json["webDurationScreen9"]);
 
-  
 
 		  readOK = true;
 
@@ -749,24 +770,34 @@ void ESP8266_Basic::write_cfgFile(){
   json["filePath"] = cfg.filePath;
   json["webNameScreen0"] = cfg.webNameScreen0;
   json["webUnitScreen0"] = cfg.webUnitScreen0;
+  json["webDurationScreen0"] = cfg.webDurationScreen0;
   json["webNameScreen1"] = cfg.webNameScreen1;
   json["webUnitScreen1"] = cfg.webUnitScreen1;
+  json["webDurationScreen1"] = cfg.webDurationScreen1;
   json["webNameScreen2"] = cfg.webNameScreen2;
   json["webUnitScreen2"] = cfg.webUnitScreen2;
+  json["webDurationScreen2"] = cfg.webDurationScreen2;
   json["webNameScreen3"] = cfg.webNameScreen3;
   json["webUnitScreen3"] = cfg.webUnitScreen3;
+  json["webDurationScreen3"] = cfg.webDurationScreen3;
   json["webNameScreen4"] = cfg.webNameScreen4;
   json["webUnitScreen4"] = cfg.webUnitScreen4;
+  json["webDurationScreen4"] = cfg.webDurationScreen4;
   json["webNameScreen5"] = cfg.webNameScreen5;
   json["webUnitScreen5"] = cfg.webUnitScreen5;
+  json["webDurationScreen5"] = cfg.webDurationScreen5;
   json["webNameScreen6"] = cfg.webNameScreen6;
   json["webUnitScreen6"] = cfg.webUnitScreen6;
+  json["webDurationScreen6"] = cfg.webDurationScreen6;
   json["webNameScreen7"] = cfg.webNameScreen7;
   json["webUnitScreen7"] = cfg.webUnitScreen7;
+  json["webDurationScreen7"] = cfg.webDurationScreen7;
   json["webNameScreen8"] = cfg.webNameScreen8;
   json["webUnitScreen8"] = cfg.webUnitScreen8;
+  json["webDurationScreen8"] = cfg.webDurationScreen8;
   json["webNameScreen9"] = cfg.webNameScreen9;
   json["webUnitScreen9"] = cfg.webUnitScreen9;
+  json["webDurationScreen9"] = cfg.webDurationScreen9;
 
 
 
