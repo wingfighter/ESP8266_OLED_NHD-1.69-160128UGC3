@@ -2,7 +2,7 @@
 //---------------------------------------------------------
 /*
  NHD-1.69-160128UGC3_WebConfigLib_ESP8266.ino
- V 0.32
+ V 0.33
  Program for writing to Newhaven Display's 160x128 Graphic Color OLED with SEPS525 controller.
  Using WebConfig fpr MQTT, WIFI.... 
  
@@ -432,9 +432,13 @@ void getTemperature() {
 void milli_delay( unsigned long ms){
 //  DBG_OUTPUT_PORT.print("delay: ");
 //  DBG_OUTPUT_PORT.println(ms);
-  unsigned long now = millis();
-//  while (millis() < (now + ms)){}
-  delay(ms);
+  unsigned long count=0;
+  while (count < ms){
+      delay(1);
+      count++;
+      espClient.handle_connections();
+      FSBrowserServer.handleClient();
+  }    
 }
 
 byte minValue( byte cR10h, byte cG11h, byte cB12h){
@@ -1217,7 +1221,7 @@ String getContentType(String filename){
 
 bool handleFileRead(String path){
   DBG_OUTPUT_PORT.println("handleFileRead: " + path);
-  if(path.endsWith("/")) path += "index.htm";
+  if(path.endsWith("/")) path += "ReadMe.txt";
   String contentType = getContentType(path);
   String pathWithGz = path + ".gz";
   if(SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)){
@@ -1423,7 +1427,7 @@ void setup()
 
   // start serial
   Serial.begin(115200);
-  milli_delay(5);
+  delay(10);
 
   // prepare GPIO LED
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
@@ -1488,114 +1492,116 @@ void loop()
     OLED_FadeOut_160128RGB(0);
     while(1)                                          // wait here forever
     {
-        espClient.handle_connections(); 
-        
-        FSBrowserServer.handleClient();
          
-        // check if Clock sync intervall 
-        now = millis();
-        if ((now - previousMillisNTP >= intervalNTP) || (setNTP_OK == false))
+        espClient.handle_connections(); 
+        if (!espClient.config_running)
         {
-           // save the last time you read the sensor 
-           previousMillisNTP = now;   
-           // Sync Time
-           getNTPTime();
-        }
+            FSBrowserServer.handleClient();
+         
+            // check if Clock sync intervall 
+            now = millis();
+            if ((now - previousMillisNTP >= intervalNTP) || (setNTP_OK == false))
+           {
+               // save the last time you read the sensor 
+              previousMillisNTP = now;   
+              // Sync Time
+               getNTPTime();
+           }
        
-        OLED_FillArea_160128RGB(0, 159, 0, 127, BLACK); //clear screen
+           OLED_FillArea_160128RGB(0, 160, 0, 128, BLACK); //clear screen
 
-        // hh:mm
-        strcpy(charTime, printDigits(hour()).c_str());
-        strcat(charTime, ":");
-        strcat(charTime, printDigits(minute()).c_str());
-        OLED_StringSmallFont_160128RGB(80 - countPixel(charTime)/2, 38, charTime , BLUE, BLACK);   // 0
+          // hh:mm
+          strcpy(charTime, printDigits(hour()).c_str());
+          strcat(charTime, ":");
+          strcat(charTime, printDigits(minute()).c_str());
+          OLED_StringSmallFont_160128RGB(80 - countPixel(charTime)/2, 38, charTime , BLUE, BLACK);   // 0
 
-        // dd.mm.yyyy
-        strcpy(charDate, printDigits(day()).c_str());
-        strcat(charDate, ".");
-        strcat(charDate, printDigits(month()).c_str());
-        strcat(charDate, ".");
-        strcat(charDate, printDigits(year()).c_str());
-        OLED_StringSmallFont_160128RGB(80 - countPixel(charDate)/2, 18, charDate , BLUE, BLACK);   // 0
+          // dd.mm.yyyy
+          strcpy(charDate, printDigits(day()).c_str());
+          strcat(charDate, ".");
+          strcat(charDate, printDigits(month()).c_str());
+          strcat(charDate, ".");
+          strcat(charDate, printDigits(year()).c_str());
+          OLED_StringSmallFont_160128RGB(80 - countPixel(charDate)/2, 18, charDate , BLUE, BLACK);   // 0
 
-        // send temperature, humidity via MQTT
-        now = millis();
-        if (now - previousMillisMQTT > 10000) 
-        {
-          previousMillisMQTT = now;
+          // send temperature, humidity via MQTT
+          now = millis();
+          if (now - previousMillisMQTT > 10000) 
+          {
+            previousMillisMQTT = now;
 
-          digitalWrite(DHTVDD, HIGH);                     // DHT on for read
-          milli_delay(500);
-          newTemp = dht.readTemperature(false);           // Read temperature if trus as Fahrenheit, if false as Celsius
-          newHum = dht.readHumidity();                    // Read humidity (percent)
-          digitalWrite(DHTVDD, LOW);                      // DHT off for cool down
+            digitalWrite(DHTVDD, HIGH);                     // DHT on for read
+            milli_delay(500);
+            newTemp = dht.readTemperature(false);           // Read temperature if trus as Fahrenheit, if false as Celsius
+            newHum = dht.readHumidity();                    // Read humidity (percent)
+            digitalWrite(DHTVDD, LOW);                      // DHT off for cool down
 
-          if (checkBound(newTemp, temp, diff)) {
-            temp = newTemp;
-            dtostrf(temp, 4, 1, charNewTemp);
-            Serial.print("New temperature: ");
-            Serial.println(String(temp));
-            espClient.pub(2,1,0, charNewTemp);     // MQTT publish TopicTree struct -[2]Sensor--[1]temperature--[0]T1
-            strcat(charNewTemp, "*C");
+            if (checkBound(newTemp, temp, diff)) {
+              temp = newTemp;
+              dtostrf(temp, 4, 1, charNewTemp);
+              Serial.print("New temperature: ");
+              Serial.println(String(temp));
+              espClient.pub(2,1,0, charNewTemp);     // MQTT publish TopicTree struct -[2]Sensor--[1]temperature--[0]T1
+              strcat(charNewTemp, "*C");
+            }
+
+            if (checkBound(newHum, hum, diff)) {
+              hum = newHum;
+              dtostrf(hum, 4, 1, charNewHum);
+              Serial.print("New humidity: ");
+              Serial.println(String(hum));
+              espClient.pub(2,2,0, charNewHum);     // MQTT publish TopicTree struct -[2]Sensor--[2]humidity--[0]H1
+              strcat(charNewHum, "%");
+            }  
           }
-
-          if (checkBound(newHum, hum, diff)) {
-            hum = newHum;
-            dtostrf(hum, 4, 1, charNewHum);
-            Serial.print("New humidity: ");
-            Serial.println(String(hum));
-            espClient.pub(2,2,0, charNewHum);     // MQTT publish TopicTree struct -[2]Sensor--[2]humidity--[0]H1
-            strcat(charNewHum, "%");
-          }  
-        }
 
 // If Diving-Control is true
 #ifdef LDC
-        // Read analog port A0 
-        sensor_value  = analogRead(SENSOR);
-        sv = (sensor_value*100/1023);
+         // Read analog port A0 
+         sensor_value  = analogRead(SENSOR);
+         sv = (sensor_value*100/1023);
 
-        Serial.print("Analog A0: ");
-        Serial.println(sv);
+         Serial.print("Analog A0: ");
+         Serial.println(sv);
         
-        // Set Driving to OLED
-        OLED_Driving_Current_160128RGB(223 * sv/100, 197 * sv/100, 179 * sv/100);      //OLED set driving
+         // Set Driving to OLED
+         OLED_Driving_Current_160128RGB(223 * sv/100, 197 * sv/100, 179 * sv/100);      //OLED set driving
 #endif
-        // Display Temerature
-        strcpy(espClient.MyOLEDDisplay[4].Screen, charNewTemp); // copy for display on Website
+         // Display Temerature
+         strcpy(espClient.MyOLEDDisplay[4].Screen, charNewTemp); // copy for display on Website
 
-        OLED_FillArea_160128RGB(0, 160, 100, 128, BLACK);
-        OLED_StringSmallFont_160128RGB(80 - countPixel("Temperatur")/2 , 124, "Temperatur"  , BLUE, BLACK);   // 0
-        OLED_FillArea_160128RGB(0, 160, 43, 95, BLACK);
-        OLED_StringBigFont_160128RGB(0, 90, charNewTemp , YELLOW, BLACK);   // 0
+         OLED_FillArea_160128RGB(0, 160, 100, 128, BLACK);
+         OLED_StringSmallFont_160128RGB(80 - countPixel("Temperatur")/2 , 124, "Temperatur"  , BLUE, BLACK);   // 0
+         OLED_FillArea_160128RGB(0, 160, 43, 95, BLACK);
+         OLED_StringBigFont_160128RGB(0, 90, charNewTemp , YELLOW, BLACK);   // 0
 
-        OLED_FadeIn_160128RGB(fadeInTime);
-        digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on 
-        milli_delay(atoi(espClient.cfg.webDurationScreen4)*1000);                      // Wait for a second
-        OLED_FadeOut_160128RGB(fadeOutTime);
+         OLED_FadeIn_160128RGB(fadeInTime);
+         digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on 
+         milli_delay(atoi(espClient.cfg.webDurationScreen4)*1000);                      // Wait for a second
+         OLED_FadeOut_160128RGB(fadeOutTime);
 
-        // Display Humidity
-        strcpy(espClient.MyOLEDDisplay[5].Screen, charNewHum); // copy for display on Website
+         // Display Humidity
+         strcpy(espClient.MyOLEDDisplay[5].Screen, charNewHum); // copy for display on Website
         
-        OLED_FillArea_160128RGB(0, 160, 100, 128, BLACK);
-        OLED_StringSmallFont_160128RGB(80 - countPixel("Luftfeuchte")/2, 124, "Luftfeuchte" , BLUE, BLACK);   // 0
-        OLED_FillArea_160128RGB(0, 159, 43, 95, BLACK);
-        OLED_StringBigFont_160128RGB(3, 90, charNewHum, YELLOW, BLACK);   // 0
-        OLED_FadeIn_160128RGB(fadeInTime);
-        digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
-        milli_delay(atoi(espClient.cfg.webDurationScreen5)*1000);                      // Wait for two seconds (to demonstrate the active low LED)
-        OLED_FadeOut_160128RGB(fadeOutTime);
+         OLED_FillArea_160128RGB(0, 160, 100, 128, BLACK);
+         OLED_StringSmallFont_160128RGB(80 - countPixel("Luftfeuchte")/2, 124, "Luftfeuchte" , BLUE, BLACK);   // 0
+         OLED_FillArea_160128RGB(0, 160, 43, 95, BLACK);
+         OLED_StringBigFont_160128RGB(3, 90, charNewHum, YELLOW, BLACK);   // 0
+         OLED_FadeIn_160128RGB(fadeInTime);
+         digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
+         milli_delay(atoi(espClient.cfg.webDurationScreen5)*1000);                      // Wait for two seconds (to demonstrate the active low LED)
+         OLED_FadeOut_160128RGB(fadeOutTime);
 
-        for ( int i=0; i<4;i++) // 10, wenn alle 9 Zusatzdisplay ausgewertet werden sollen
-        {
-          if (strcmp(espClient.MyOLEDDisplay[i].Screen, "clear") !=0)
-          {
-            dtostrf(atof(espClient.MyOLEDDisplay[i].Screen), 4, 1, charDisplay);
-            // Clear first line
-            OLED_FillArea_160128RGB(0, 160, 100, 128, BLACK);
-            // Display Toptitle
-            switch (i) 
-            {
+         for ( int i=0; i<4;i++) // 10, wenn alle 9 Zusatzdisplay ausgewertet werden sollen
+         {
+           if (strcmp(espClient.MyOLEDDisplay[i].Screen, "clear") !=0)
+           {
+             dtostrf(atof(espClient.MyOLEDDisplay[i].Screen), 4, 1, charDisplay);
+             // Clear first line
+             OLED_FillArea_160128RGB(0, 160, 100, 128, BLACK);
+             // Display Toptitle
+             switch (i) 
+             {
                case 0:
                  strcpy(topDisplay,espClient.cfg.webNameScreen0);
                  strcpy(webUnit,espClient.cfg.webUnitScreen0);
@@ -1606,24 +1612,31 @@ void loop()
                  strcpy(webUnit,espClient.cfg.webUnitScreen1);
                  delayTime = atoi(espClient.cfg.webDurationScreen1)*1000;
                  break;
-            }
-            strcat(charDisplay, webUnit);           // Einheit (*C, %) anhängen
+             }
+             strcat(charDisplay, webUnit);           // Einheit (*C, %) anhängen
 
-            OLED_StringSmallFont_160128RGB(80 - countPixel(topDisplay)/2, 127, topDisplay , BLUE, BLACK);   // Toptitle             
-            OLED_FillArea_160128RGB(0, 160, 43, 95, BLACK);
-            OLED_StringBigFont_160128RGB(0, 90, charDisplay, YELLOW, BLACK);   // Value
-            OLED_FadeIn_160128RGB(fadeInTime);
-            milli_delay(delayTime);                      
-            OLED_FadeOut_160128RGB(fadeOutTime);
+             OLED_StringSmallFont_160128RGB(80 - countPixel(topDisplay)/2, 127, topDisplay , BLUE, BLACK);   // Toptitle             
+             OLED_FillArea_160128RGB(0, 160, 43, 95, BLACK);
+             OLED_StringBigFont_160128RGB(0, 90, charDisplay, YELLOW, BLACK);   // Value
+             OLED_FadeIn_160128RGB(fadeInTime);
+             milli_delay(delayTime);                      
+             OLED_FadeOut_160128RGB(fadeOutTime);
           }
-        }
+       }
 
-        // Show Weather Bitmap
-        OLED_FillArea_160128RGB(0, 160, 0, 128, BLACK);
-        selectWeatherIcon(0);  // 0=today
-        OLED_FadeIn_160128RGB(fadeInTime);
-        milli_delay(5000);                      // Wait for a second
-        OLED_FadeOut_160128RGB(fadeOutTime);
-
-    } //while(1) 
+       // Show Weather Bitmap
+       OLED_FillArea_160128RGB(0, 160, 0, 128, BLACK);
+       selectWeatherIcon(0);  // 0=today
+       OLED_FadeIn_160128RGB(fadeInTime);
+       milli_delay(5000);                      // Wait for a second
+       OLED_FadeOut_160128RGB(fadeOutTime);
+    } 
+    else
+    {
+       Serial.println("Config mode activ! (loop())");
+       OLED_FillArea_160128RGB(0, 160, 0, 128, BLACK);
+       OLED_StringSmallFont_160128RGB(80 - countPixel("Config mode")/2, 102, "Config mode" , WHITE, BLACK);   // 0
+    } // if config_runnig
+    
+  } //while(1) 
 }

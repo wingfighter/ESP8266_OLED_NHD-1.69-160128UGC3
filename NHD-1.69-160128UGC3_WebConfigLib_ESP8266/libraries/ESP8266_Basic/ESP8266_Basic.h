@@ -72,6 +72,7 @@ public:
   bool pub(int e1, int e2, char* Payload);
   bool pub(int e1, int e2, int e3, char* Payload);
   unsigned int localPort = 2390;                // local port to listen for UDP packets
+  bool config_running;
 
   //AktSen
   void handle_Measurement();
@@ -102,7 +103,6 @@ private:
   void write_cfg();
   void write_cfgFile();
   void resetSettings();  
-  bool config_running;
 
   
   //MyData-Control---------------------

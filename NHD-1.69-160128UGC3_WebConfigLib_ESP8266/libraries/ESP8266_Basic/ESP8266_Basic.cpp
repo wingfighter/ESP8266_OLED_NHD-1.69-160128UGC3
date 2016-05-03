@@ -164,9 +164,6 @@ void ESP8266_Basic::mqttBroker_Callback(char* topic, byte* payload, unsigned int
 		  {
 		 	MyOLEDDisplay[i].Screen[j] = value[j];
 		  }
-//   char buffer[30];
-//   sprintf(buffer, "with %%p:  MyOLEDDisplay[%i].Screen    = %p\n", i, &MyOLEDDisplay[i].Screen);
-//   Serial.print(buffer);
 		}
 	 }
 
@@ -346,14 +343,8 @@ void ESP8266_Basic::handle_connections(){
 //===> start ConfigServer <----------------------------------------------------
 void ESP8266_Basic::startConfigServer(){  
 
-    char buffer[30];
-   sprintf(buffer, "with %%p:  cfg    = %p\n", &cfg);
-   Serial.print(buffer);
-
   webServer.set_cfgPointer(&cfg);
-
-   sprintf(buffer, "with %%p:  MyOLEDDisplay    = %p\n", &MyOLEDDisplay);
-   Serial.print(buffer);
+ // webServer.set_ConfigRunningPointer(&config_running);
  
   struct MyScreen *pMyScreen = &MyOLEDDisplay[0];
   webServer.set_OLEDPointer(pMyScreen);
@@ -415,8 +406,7 @@ bool WiFiOK = false;
 	Serial.print("Local port: ");
     Serial.println(udp.localPort());
 
-	
-  
+ 
 	//IPAddress ip = WiFi.localIP();
     //TopicHeader = ip[3];
   }  
@@ -738,7 +728,10 @@ bool ESP8266_Basic::read_cfgFile(){
   } else {
     Serial.println("failed to mount FS");
   }
+  Serial.println("cfgFile close...");
+
   cfgFile.close();
+  Serial.println("cfgFile closed.");
   //end read
   return readOK;
 
@@ -809,7 +802,7 @@ void ESP8266_Basic::write_cfgFile(){
 	SPIFFS.format();
 	Serial.println("done");
 	//write_cfgFile();
- }
+  }
 
 //  Serial.println("after write_cfgFile ");
 //  json.printTo(Serial);

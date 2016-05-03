@@ -78,20 +78,17 @@ void ESP8266_Basic_webServer::handleClient(){
 //===> CFGstruct pointer <-----------------------------------------------------
 void ESP8266_Basic_webServer::set_cfgPointer(CFG *p){
   cfg = p;
-   char buffer[30];
-   sprintf(buffer, "with %%p:  cfg    = %p\n", cfg);
-   Serial.print(buffer);
-
 }
 
 //===> OLEDDisplaystruct pointer <---------------------------------------------
 void ESP8266_Basic_webServer::set_OLEDPointer(MyScreen *p){
   oled = p;
-   char buffer[30];
-   sprintf(buffer, "with %%p:  oled    = %p\n", oled);
-   Serial.print(buffer);
-
 }
+
+//void ESP8266_Basic_webServer::set_ConfigRunningPointer(bool *p){
+//  fConfigRunning = p;
+//}
+
 
 //===> Callback for CFGchange <------------------------------------------------
 void ESP8266_Basic_webServer::set_saveConfig_Callback(CallbackFunction c){
@@ -248,6 +245,12 @@ void ESP8266_Basic_webServer::sensorPageHandler(){
 //#############################################################################
 void ESP8266_Basic_webServer::rootPageHandler()
 {
+   // Disable Screen-Rotate
+//   Serial.print("Config mode activ! (rootPageHandler()) -> ");Serial.println(fConfigRunning);
+
+//   fConfigRunning = true;
+
+
   // Check if there are any GET parameters
   if (webServer.hasArg("webUser")) strcpy(cfg->webUser, webServer.arg("webUser").c_str());
   if (webServer.hasArg("webPassword")) strcpy(cfg->webPassword, webServer.arg("webPassword").c_str());
@@ -546,6 +549,9 @@ void ESP8266_Basic_webServer::gpioPageHandler()
 
 void ESP8266_Basic_webServer::screenConfigHandler()
 {
+   // Disable Screen-Rotate
+   //Serial.println("Config mode activ! (screenConfigHandler()) -> ");Serial.println(fConfigRunning);
+   //fConfigRunning = true;
 
   // Check if there are any GET parameters
   if (webServer.hasArg("webNameScreen0")) strcpy(cfg->webNameScreen0, webServer.arg("webNameScreen0").c_str());
@@ -578,52 +584,6 @@ void ESP8266_Basic_webServer::screenConfigHandler()
   if (webServer.hasArg("webNameScreen9")) strcpy(cfg->webNameScreen9, webServer.arg("webNameScreen9").c_str());
   if (webServer.hasArg("webUnitScreen9")) strcpy(cfg->webUnitScreen9, webServer.arg("webUnitScreen9").c_str());
   if (webServer.hasArg("webDurationScreen9")) strcpy(cfg->webDurationScreen9, webServer.arg("webDurationScreen9").c_str());
-
-/*
-
-   char buffer[30];
-
-  Serial.print("oled[0]->Screen: ");
-  Serial.println(oled[0].Screen);
-
-   sprintf(buffer, "with %%p:  oled[0]->Screen    = %p\n",  &oled[0].Screen);
-   Serial.print(buffer);
-
-  Serial.print("oled[1]->Screen: ");
-  Serial.println(oled[1].Screen);
-
-   sprintf(buffer, "with %%p:  oled[1]->Screen    = %p\n",  &oled[1].Screen);
-   Serial.print(buffer);
-
-  Serial.print("oled[2]->Screen: ");
-  Serial.println(oled[2].Screen);
-
-   sprintf(buffer, "with %%p:  oled[2]->Screen    = %p\n",  &oled[2].Screen);
-   Serial.print(buffer);
-
-  Serial.print("oled[3]->Screen: ");
-  Serial.println(oled[3].Screen);
-
-   sprintf(buffer, "with %%p:  oled[3]->Screen    = %p\n",  &oled[3].Screen);
-   Serial.print(buffer);
-/*
-
-  Serial.print("oled[4]->Screen: ");
-  Serial.println(oled[4]->Screen);
-  Serial.print("oled[5]->Screen: ");
-  Serial.println(oled[5]->Screen);
-  Serial.print("oled[6]->Screen: ");
-  Serial.println(oled[6]->Screen);
-  Serial.print("oled[7]->Screen: ");
-  Serial.println(oled[7]->Screen);
-  Serial.print("oled[8]->Screen: ");
-  Serial.println(oled[8]->Screen);
-  Serial.print("oled[9]->Screen: ");
-  Serial.println(oled[91]->Screen);
-
-*/
-
-
 
   String rm = ""
 

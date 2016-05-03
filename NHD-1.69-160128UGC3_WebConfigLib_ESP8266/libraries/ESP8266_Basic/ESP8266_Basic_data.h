@@ -14,7 +14,7 @@
 
 ********************************************************************************/
 #pragma once
-#define Version "ESP_Basic by Pf@nne V0.200/winfighter V0.32"
+#define Version "ESP_Basic by Pf@nne V0.200/winfighter V0.33"
  
   typedef char* topicField; 
 

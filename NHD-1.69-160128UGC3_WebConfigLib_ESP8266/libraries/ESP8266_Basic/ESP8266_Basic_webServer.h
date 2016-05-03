@@ -43,6 +43,7 @@ public:
   
   void set_cfgPointer(CFG *p);  
   void set_OLEDPointer(MyScreen *p);
+//  void set_ConfigRunningPointer(bool *p);
   void set_saveConfig_Callback(CallbackFunction c);
   void updateFirmware();
   
@@ -53,6 +54,7 @@ private:
   CFG *cfg;
   MyScreen *oled;
   File fsUploadFile;
+//  bool fConfigRunning;
   //Page controls----------------
   void rootPageHandler();
   void sensorPageHandler();
