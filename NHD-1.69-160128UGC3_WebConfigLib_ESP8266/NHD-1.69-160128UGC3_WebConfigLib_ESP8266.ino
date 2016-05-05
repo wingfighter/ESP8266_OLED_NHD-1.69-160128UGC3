@@ -2,7 +2,7 @@
 //---------------------------------------------------------
 /*
  NHD-1.69-160128UGC3_WebConfigLib_ESP8266.ino
- V 0.33
+ V 0.34
  Program for writing to Newhaven Display's 160x128 Graphic Color OLED with SEPS525 controller.
  Using WebConfig fpr MQTT, WIFI.... 
  
@@ -27,6 +27,7 @@
 #include <ESP8266WebServer.h>
 #include <Time.h>
 #include <TimeLib.h>
+#include <math.h>
 //#include <PubSubClient.h>
 #include "ESP8266_Basic.h"
 #include <FS.h>
@@ -67,7 +68,7 @@
 
 #define DBG_OUTPUT_PORT Serial
 
-
+#define VERSION "V 0.33a" 
 
 
 // Create espClient from Basic_lib
@@ -432,10 +433,11 @@ void getTemperature() {
 void milli_delay( unsigned long ms){
 //  DBG_OUTPUT_PORT.print("delay: ");
 //  DBG_OUTPUT_PORT.println(ms);
-  unsigned long count=0;
-  while (count < ms){
+  unsigned long now = millis();
+//  unsigned long count=0;
+  while ((millis() - now) < ms){
       delay(1);
-      count++;
+//      count++;
       espClient.handle_connections();
       FSBrowserServer.handleClient();
   }    
@@ -730,29 +732,79 @@ void OLED_FadeIn_160128RGB(unsigned int fadingTime)
 /************ START **************/
 /*********************************/
 
-void OLED_smallText_160128RGB(unsigned char x_pos, unsigned char y_pos, unsigned int letter, unsigned long textColor, unsigned long backgroundColor)  // function to show letter
+unsigned char findLastRightBit(unsigned int letter)
 {
-    int row;                                     // Anzahl Zeilen=Zeichenhöhe Zähler
-    int j;                                       // Bytes/Zeile Zähler
-    int count;                                   // BitzÃ¤hler 
+    int row;                                            // Anzahl Zeilen=Zeichenhöhe Zähler
     int byteRow = (int)smallFontArrayInfo[letter][0];   // Bytes pro Zeile
     int rowChar = (int)smallFontArrayInfo[letter][1];   // Zeilen pro Zeichen
     int arrayPos = (int)smallFontArrayInfo[letter][2];  // Beginn-Position in bigArray
-    unsigned char mask = 0x80;                   // Biteweise  ausmaskieren
+    unsigned char mask = 0x01;                          // Biteweise ausmaskieren von rechts nach links
+    unsigned char lsb  = 0xFF;                          // rechteste Bit merken
 
+    for(row=0;row < rowChar;row++)                      // Zeichenhöhe
+    {
+       while( ((smallFontArray[arrayPos + byteRow - 1] & mask) == 0) && (mask > 0x00))
+       {
+          mask = mask << 1;
+       }
+       if ((mask < lsb) && (mask > 0x00)) lsb = mask;   // rechteste Bit (LSB) merken
+       mask = 0x01;
+       arrayPos += byteRow;
+    }
+  return lsb;
+}
+
+int countPixel(const char array_of_string[])
+{
+  unsigned int xCharSpace = 2;  // Abstand zwischen den Zeichen
+  int hPixel = 0;    
+  unsigned int smallFontArrayPos = 0; 
     
-    for(row=0;row <rowChar;row++)        // Zeichenhöhe
+    for (int i=0;i < strlen(array_of_string); i++){
+       switch (array_of_string[i]) 
+       {
+         case ' ':
+            //if ' ' then print '0'
+            smallFontArrayPos = 11;
+            break;
+         case '*':
+            //Array-Pos for '°'
+            smallFontArrayPos = 139;
+            break;
+         default: 
+            //Array-Pos for '0' to '9' 
+            smallFontArrayPos = array_of_string[i]-32;
+            break;
+      }
+      // Erläuterung der Berechnung: siehe OLED_StringSmallFont_160128RGB()
+      hPixel += (((int)smallFontArrayInfo[smallFontArrayPos][0] -1) * 8)  + (8 - log2(findLastRightBit(smallFontArrayPos))) + xCharSpace;
+    }
+ return hPixel;
+}
+
+void OLED_smallText_160128RGB(unsigned char x_pos, unsigned char y_pos, unsigned int letter, unsigned long textColor, unsigned long backgroundColor)  // function to show letter
+{
+    int row;                                                           // Anzahl Zeilen=Zeichenhöhe Zähler
+    int j;                                                             // Bytes/Zeile Zähler
+    int count;                                                         // Bitzähler 
+    int byteRow = (int)smallFontArrayInfo[letter][0];                  // Bytes pro Zeile
+    int rowChar = (int)smallFontArrayInfo[letter][1];                  // Zeilen pro Zeichen
+    int arrayPos = (int)smallFontArrayInfo[letter][2];                 // Beginn-Position in bigArray
+    unsigned char mask = 0x80;                                         // Biteweise  ausmaskieren
+    unsigned char lastRightBit = 8 - log2(findLastRightBit(letter));   // im rechten Byte nur die belegten Bits ausgeben
+
+    for(row=0;row <rowChar;row++)                             // Zeichenhöhe
     {
         OLED_SetPosition_160128RGB(x_pos,y_pos);
         OLED_WriteMemoryStart_160128RGB();
-        for (j=0;j < byteRow;j++)                     // Bytes/Zeile
+        for (j=0;j < byteRow;j++)                            // Bytes/Zeile
         {
-            for (count=0;count < 8;count++)            // Pixel/Byte
+            for (count=0;count < ((arrayPos < (arrayPos + byteRow)) ? 8 : lastRightBit);count++)            // 8 Pixel/Byte - im rechten Byte nur die max belegten Pixel
             {
                 if((smallFontArray[arrayPos] & mask) == mask)
                     OLED_Pixel_160128RGB(textColor);
                 else
-                   OLED_Pixel_160128RGB(backgroundColor);
+                    OLED_Pixel_160128RGB(backgroundColor);
                 mask = mask >> 1;
             }
             arrayPos++;
@@ -772,7 +824,6 @@ void OLED_bigText_160128RGB(unsigned char x_pos, unsigned char y_pos, unsigned i
     int arrayPos = (int)bigFontArrayInfo[letter][2];  // Beginn-Position in bigArray
     unsigned char mask = 0x80;                   // Biteweise  ausmaskieren
 
-    
     for(row=0;row<rowChar;row++)        // Zeichenhöhe
     {
         OLED_SetPosition_160128RGB(x_pos,y_pos);
@@ -794,42 +845,12 @@ void OLED_bigText_160128RGB(unsigned char x_pos, unsigned char y_pos, unsigned i
     }
 }
 
-
-
-int countPixel(const char array_of_string[])
-{
-  unsigned int xCharSpace = 0;  // Abstand zwischen den Zeichen
-  int hPixel = 0;    
-  unsigned int smallFontArrayPos = 0; 
-    
-    for (int i=0;i < strlen(array_of_string); i++){
-       switch (array_of_string[i]) 
-       {
-         case ' ':
-            //if ' ' then print '0'
-            smallFontArrayPos = 11;
-            break;
-         case '*':
-            //Array-Pos for '°'
-            smallFontArrayPos = 139;
-            break;
-         default: 
-            //Array-Pos for '0' to '9' 
-            smallFontArrayPos = array_of_string[i]-32;
-            break;
-      }
-      hPixel += (int)smallFontArrayInfo[smallFontArrayPos][0]*8  + xCharSpace; 
-    }
- return hPixel;
-}
-
 void OLED_StringSmallFont_160128RGB(unsigned char x_pos, unsigned char y_pos, const char array_of_string[], unsigned long textColor, unsigned long backgroundColor)  // function to show Number in Verdana
 {
     unsigned int xCharPos = 0;    // x-Position Zeichen auf der Zeile
-    unsigned int xCharSpace = 1;  // Abstand zwischen den Zeichen
+    unsigned int xCharSpace = 2;  // Abstand zwischen den Zeichen
     unsigned int smallFontArrayPos = 0; 
 
-    
     for (int i=0;i < strlen(array_of_string); i++)
     {                      // Buchstabenabstand, Zeile, wenn Dezimalpunkt - dann andere Stelle in Font-Array abfragen, sonst Zahlenwert-Position  
        switch (array_of_string[i]) 
@@ -852,7 +873,14 @@ void OLED_StringSmallFont_160128RGB(unsigned char x_pos, unsigned char y_pos, co
 //  Serial.print(xCharPos); Serial.print("->");Serial.println(array_of_string[i]);
      
      OLED_smallText_160128RGB(x_pos + xCharPos, y_pos, smallFontArrayPos,  textColor, backgroundColor);
-     xCharPos = xCharPos + (int)smallFontArrayInfo[smallFontArrayPos][0]*8 + xCharSpace;
+     /***************************************************************************************************************************************************
+     // Neue Position ergibt sich aus der Addition der alten Position + Anzahl der Bytes pro Zeichen (Array [0])
+     // Jedes Byte wird mit 8 Bit bewertet ( Array[0]*8 ), außer das letzte (ganz rechte) Byte. Davon werden nur von links beginnend
+     // soviel Bits gezählt, wie auch max. belegt sind. "findLastRightBit" findet die niedrigts belegte Bitposition aus einer der Array[1] Zeilen. 
+     // Diese muss von 8 subtrahiert werden um die Anzahl der zu berücksichtigenden Bits für die neue Position zu bestimmen. ( 8 - findLastRightBit)
+     // Die Funktion gibt einen char zurück. Char (0-255) entspricht Bit 1 oder 2 oder 3 etc.) Umd die Bitnummer zu ermitteln muss der log2 gezogen werden.
+     ****************************************************************************************************************************************************/
+     xCharPos = xCharPos + (((int)smallFontArrayInfo[smallFontArrayPos][0] -1) * 8)  + (8 - log2(findLastRightBit(smallFontArrayPos))) + xCharSpace;
     }      
 }
 
@@ -1221,7 +1249,7 @@ String getContentType(String filename){
 
 bool handleFileRead(String path){
   DBG_OUTPUT_PORT.println("handleFileRead: " + path);
-  if(path.endsWith("/")) path += "ReadMe.txt";
+  if(path.endsWith("/")) path += "index.htm";
   String contentType = getContentType(path);
   String pathWithGz = path + ".gz";
   if(SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)){
@@ -1428,6 +1456,8 @@ void setup()
   // start serial
   Serial.begin(115200);
   delay(10);
+  Serial.println("");
+  Serial.print("Version: ");Serial.println(VERSION);
 
   // prepare GPIO LED
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
