@@ -43,30 +43,44 @@ Topics::Topics(){
    ¦-[1] Control
    ¦  ¦-[10] ESP8266
    ¦  ¦  ¦-[100] Reboot
-   ¦  ¦  +-[101] ShowConfig   
+   ¦  ¦  ¦-[101] ShowConfig   
    ¦  ¦  +-[102] Update Firmware   
    ¦     
    ¦-[2] Display
    ¦  ¦-[20] NHD 1.69
    ¦  ¦  ¦-[200] Screen 0
-   ¦  ¦  +-[201] Screen 1   
-   ¦  ¦  +-[202] Screen 2   
-   ¦  ¦  +-[203] Screen 3   
-   ¦  ¦  +-[204] Screen 4   
-   ¦  ¦  +-[205] Screen 5   
-   ¦  ¦  +-[206] Screen 6   
-   ¦  ¦  +-[207] Screen 7   
-   ¦  ¦  +-[208] Screen 8   
+   ¦  ¦  ¦-[201] Screen 1   
+   ¦  ¦  ¦-[202] Screen 2   
+   ¦  ¦  ¦-[203] Screen 3   
+   ¦  ¦  ¦-[204] Screen 4   
+   ¦  ¦  ¦-[205] Screen 5   
+   ¦  ¦  ¦-[206] Screen 6   
+   ¦  ¦  ¦-[207] Screen 7   
+   ¦  ¦  ¦-[208] Screen 8   
    ¦  ¦  +-[209] Screen 9   
    ¦     
    ¦-[3] Warther
    ¦  ¦-[30] Forecast
    ¦  ¦  ¦-[300] Day 0
-   ¦  ¦  +-[301] Day 1   
-   ¦  ¦  +-[302] Day 2   
-   ¦  ¦  +-[303] Day 3   
-   ¦  ¦  +-[304] Day 4   
+   ¦  ¦  ¦-[301] Day 1   
+   ¦  ¦  ¦-[302] Day 2   
+   ¦  ¦  ¦-[303] Day 3   
+   ¦  ¦  ¦-[304] Day 4   
    ¦  ¦  +-[305] Day 5   
+   ¦  ¦-[31] Condition
+   ¦  ¦  ¦-[310] Day 0
+   ¦  ¦  ¦-[311] Day 1   
+   ¦  ¦  ¦-[312] Day 2   
+   ¦  ¦  ¦-[313] Day 3   
+   ¦  ¦  ¦-[314] Day 4   
+   ¦  ¦  +-[315] Day 5   
+   ¦  ¦-[32] Date
+   ¦  ¦  ¦-[320] Day 0
+   ¦  ¦  ¦-[321] Day 1   
+   ¦  ¦  ¦-[322] Day 2   
+   ¦  ¦  ¦-[323] Day 3   
+   ¦  ¦  ¦-[324] Day 4   
+   ¦  ¦  +-[325] Day 5   
    ¦     
 */
 
@@ -121,6 +135,20 @@ Topics::Topics(){
   sub.E3.item[3][0][3] = "Day_3";
   sub.E3.item[3][0][4] = "Day_4";
   sub.E3.item[3][0][5] = "Day_5";
+  sub.E2.item[3][1] = "Condition";
+  sub.E3.item[3][1][0] = "Day_0";
+  sub.E3.item[3][1][1] = "Day_1";
+  sub.E3.item[3][1][2] = "Day_2";
+  sub.E3.item[3][1][3] = "Day_3";
+  sub.E3.item[3][1][4] = "Day_4";
+  sub.E3.item[3][1][5] = "Day_5";
+  sub.E2.item[3][2] = "Date";
+  sub.E3.item[3][2][0] = "Day_0";
+  sub.E3.item[3][2][1] = "Day_1";
+  sub.E3.item[3][2][2] = "Day_2";
+  sub.E3.item[3][2][3] = "Day_3";
+  sub.E3.item[3][2][4] = "Day_4";
+  sub.E3.item[3][2][5] = "Day_5";
 
   sub.E1.item[4] = "File";
   sub.E2.item[4][0] = "Read";

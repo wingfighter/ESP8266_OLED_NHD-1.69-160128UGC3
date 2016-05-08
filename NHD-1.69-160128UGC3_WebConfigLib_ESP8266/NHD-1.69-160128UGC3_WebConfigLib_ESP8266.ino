@@ -2,7 +2,7 @@
 //---------------------------------------------------------
 /*
  NHD-1.69-160128UGC3_WebConfigLib_ESP8266.ino
- V 0.34
+ V 0.35
  Program for writing to Newhaven Display's 160x128 Graphic Color OLED with SEPS525 controller.
  Using WebConfig fpr MQTT, WIFI.... 
  
@@ -68,7 +68,7 @@
 
 #define DBG_OUTPUT_PORT Serial
 
-#define VERSION "V 0.33a" 
+#define VERSION "V 0.34" 
 
 
 // Create espClient from Basic_lib
@@ -757,16 +757,16 @@ unsigned char findLastRightBit(unsigned int letter)
 int countPixel(const char array_of_string[])
 {
   unsigned int xCharSpace = 2;  // Abstand zwischen den Zeichen
-  int hPixel = 0;    
+  int cPixel = 0;    
   unsigned int smallFontArrayPos = 0; 
     
     for (int i=0;i < strlen(array_of_string); i++){
        switch (array_of_string[i]) 
        {
-         case ' ':
+ //        case ' ':
             //if ' ' then print '0'
-            smallFontArrayPos = 11;
-            break;
+//            smallFontArrayPos = 11;
+//            break;
          case '*':
             //Array-Pos for '°'
             smallFontArrayPos = 139;
@@ -777,10 +777,40 @@ int countPixel(const char array_of_string[])
             break;
       }
       // Erläuterung der Berechnung: siehe OLED_StringSmallFont_160128RGB()
-      hPixel += (((int)smallFontArrayInfo[smallFontArrayPos][0] -1) * 8)  + (8 - log2(findLastRightBit(smallFontArrayPos))) + xCharSpace;
+      cPixel += (((int)smallFontArrayInfo[smallFontArrayPos][0] -1) * 8)  + (8 - log2(findLastRightBit(smallFontArrayPos))) + xCharSpace;
     }
- return hPixel;
+ return (cPixel - xCharSpace);
 }
+
+int countBigPixel(const char array_of_string[])
+{
+  unsigned int xCharSpace = 2;  // Abstand zwischen den Zeichen
+  int cPixel = 0;    
+  unsigned int bigFontArrayPos = 0; 
+    
+    for (int i=0;i < strlen(array_of_string); i++){
+       switch (array_of_string[i]) 
+       {
+         case ' ':
+            //if ' ' then print '0'
+            bigFontArrayPos = 140;
+            //cPixel += 5;
+            break;
+         case '*':
+            //Array-Pos for '°'
+            bigFontArrayPos = 139;
+            break;
+         default: 
+            //Array-Pos for '0' to '9' 
+            bigFontArrayPos = array_of_string[i] - 37;
+            break;
+      }
+      // Erläuterung der Berechnung: siehe OLED_StringSmallFont_160128RGB()
+      cPixel += (int)bigFontArrayInfo[bigFontArrayPos][0]*8 + xCharSpace;
+    }
+ return (cPixel - xCharSpace);
+}
+
 
 void OLED_smallText_160128RGB(unsigned char x_pos, unsigned char y_pos, unsigned int letter, unsigned long textColor, unsigned long backgroundColor)  // function to show letter
 {
@@ -857,15 +887,16 @@ void OLED_StringSmallFont_160128RGB(unsigned char x_pos, unsigned char y_pos, co
        {
          case ' ':
             //if ' ' then print '0'
-//            smallFontArrayPos = 11;
+            smallFontArrayPos = array_of_string[i] - 32;
+            xCharPos += 5;
             break;
-         case '*':
+//         case '*':
             //Array-Pos for '°'
 //            smallFontArrayPos = 139;
 //            xCharPos -= 3;
             break;
          default: 
-            //Array-Pos for '0' to '9' 
+            //Array-Pos for ' ' to '~' 
             smallFontArrayPos = array_of_string[i] - 32;
             break;
      }
@@ -897,16 +928,15 @@ void OLED_StringBigFont_160128RGB(unsigned int x_pos, unsigned int y_pos, const 
        switch (array_of_string[i]) 
        {
          case ' ':
-            //if ' ' then print '0'
-            bigFontArrayPos = 11;
+            //Array-Pos for ' '
+            bigFontArrayPos = 140;
+//            xCharPos += 8;
             break;
          case '*':
             //Array-Pos for '°'
             bigFontArrayPos = 139;
             xCharPos -= 3;
             break;
- //        case '0': 
- //           bmpDraw("0_30pt.bmp", x_pos + xCharPos, y_pos);
          default: 
             //Array-Pos for '0' to '9' 
             bigFontArrayPos = array_of_string[i]-37;
@@ -1603,7 +1633,7 @@ void loop()
          OLED_FillArea_160128RGB(0, 160, 100, 128, BLACK);
          OLED_StringSmallFont_160128RGB(80 - countPixel("Temperatur")/2 , 124, "Temperatur"  , BLUE, BLACK);   // 0
          OLED_FillArea_160128RGB(0, 160, 43, 95, BLACK);
-         OLED_StringBigFont_160128RGB(0, 90, charNewTemp , YELLOW, BLACK);   // 0
+         OLED_StringBigFont_160128RGB(80 - countBigPixel(charNewTemp)/2, 90, charNewTemp , YELLOW, BLACK);   // 0
 
          OLED_FadeIn_160128RGB(fadeInTime);
          digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on 
@@ -1616,7 +1646,7 @@ void loop()
          OLED_FillArea_160128RGB(0, 160, 100, 128, BLACK);
          OLED_StringSmallFont_160128RGB(80 - countPixel("Luftfeuchte")/2, 124, "Luftfeuchte" , BLUE, BLACK);   // 0
          OLED_FillArea_160128RGB(0, 160, 43, 95, BLACK);
-         OLED_StringBigFont_160128RGB(3, 90, charNewHum, YELLOW, BLACK);   // 0
+         OLED_StringBigFont_160128RGB(80 - countBigPixel(charNewHum)/2, 90, charNewHum, YELLOW, BLACK);   // 0
          OLED_FadeIn_160128RGB(fadeInTime);
          digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
          milli_delay(atoi(espClient.cfg.webDurationScreen5)*1000);                      // Wait for two seconds (to demonstrate the active low LED)
@@ -1647,7 +1677,7 @@ void loop()
 
              OLED_StringSmallFont_160128RGB(80 - countPixel(topDisplay)/2, 127, topDisplay , BLUE, BLACK);   // Toptitle             
              OLED_FillArea_160128RGB(0, 160, 43, 95, BLACK);
-             OLED_StringBigFont_160128RGB(0, 90, charDisplay, YELLOW, BLACK);   // Value
+             OLED_StringBigFont_160128RGB(80 - countBigPixel(charDisplay)/2, 90, charDisplay, YELLOW, BLACK);   // Value
              OLED_FadeIn_160128RGB(fadeInTime);
              milli_delay(delayTime);                      
              OLED_FadeOut_160128RGB(fadeOutTime);
@@ -1655,11 +1685,16 @@ void loop()
        }
 
        // Show Weather Bitmap
-       OLED_FillArea_160128RGB(0, 160, 0, 128, BLACK);
-       selectWeatherIcon(0);  // 0=today
-       OLED_FadeIn_160128RGB(fadeInTime);
-       milli_delay(5000);                      // Wait for a second
-       OLED_FadeOut_160128RGB(fadeOutTime);
+       for ( int day=0; day<1 ; day++) // 5 Days Forecast ; 1 -> Test
+       {
+          OLED_FillArea_160128RGB(0, 160, 0, 128, BLACK);
+//          OLED_StringSmallFont_160128RGB(80 - countPixel(espClient.MyWeatherIcon[day].forecastDate)/2, 127, espClient.MyWeatherIcon[day].forecastDate , BLUE, BLACK);   // Toptitle             
+          selectWeatherIcon(day);  // 0=today
+//          OLED_StringSmallFont_160128RGB(80 - countPixel(espClient.MyWeatherIcon[day].condition)/2, 28, espClient.MyWeatherIcon[day].condition , BLUE, BLACK);   // Toptitle             
+          OLED_FadeIn_160128RGB(fadeInTime);
+          milli_delay(5000);                      
+          OLED_FadeOut_160128RGB(fadeOutTime);
+       }   
     } 
     else
     {

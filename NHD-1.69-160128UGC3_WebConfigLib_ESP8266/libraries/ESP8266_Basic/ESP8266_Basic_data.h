@@ -14,7 +14,7 @@
 
 ********************************************************************************/
 #pragma once
-#define Version "ESP_Basic by Pf@nne V0.200/winfighter V0.33"
+#define Version "ESP_Basic by Pf@nne V0.200/winfighter V0.35"
  
   typedef char* topicField; 
 
@@ -81,6 +81,7 @@ private:
 // Config struct
   typedef struct CFG{
     char version[45] = Version;
+	char configSize[5]; 
     char webUser[40];
     char webPassword[40];
     char apName[40];
@@ -90,38 +91,39 @@ private:
     char wifiIP[20];
     char mqttServer[20];
     char mqttPort[6];
-    char mqttDeviceName[20];
+    char mqttDeviceName[21];
+    char mqttSecSub[31];
 	char mqttStatus[20];
 	char updateServer[20];
 	char filePath[40];
-    char webNameScreen0[14];
+    char webNameScreen0[17];
     char webUnitScreen0[3];
     char webDurationScreen0[3];
-    char webNameScreen1[14];
+    char webNameScreen1[17];
     char webUnitScreen1[3];
     char webDurationScreen1[3];
-    char webNameScreen2[14];
+    char webNameScreen2[17];
     char webUnitScreen2[3];
     char webDurationScreen2[3];
-    char webNameScreen3[14];
+    char webNameScreen3[17];
     char webUnitScreen3[3];
     char webDurationScreen3[3];
-    char webNameScreen4[14];
+    char webNameScreen4[17];
     char webUnitScreen4[3];
     char webDurationScreen4[3];
-    char webNameScreen5[14];
+    char webNameScreen5[17];
     char webUnitScreen5[3];
     char webDurationScreen5[3];
-    char webNameScreen6[14];
+    char webNameScreen6[17];
     char webUnitScreen6[3];
     char webDurationScreen6[3];
-    char webNameScreen7[14];
+    char webNameScreen7[17];
     char webUnitScreen7[3];
     char webDurationScreen7[3];
-    char webNameScreen8[14];
+    char webNameScreen8[17];
     char webUnitScreen8[3];
     char webDurationScreen8[3];
-    char webNameScreen9[14];
+    char webNameScreen9[17];
     char webUnitScreen9[3];
     char webDurationScreen9[3];
 
@@ -150,7 +152,7 @@ private:
  //MyDisplay sruct
  typedef struct MyScreen{
 	 char Screen[6] = "clear";
-	 char topRow[14] = "--Display n--";
+	 char topRow[17] = "--Display n--";
 	 char mesurementUnit[3] = "*C"; 
 	 char duration[3] = "2";
  };
@@ -158,7 +160,8 @@ private:
  //WeatherIcon sruct
  typedef struct WeatherIcon{
 	 char weatherCode[3] = "99";
-	 char forecastDay[14] = "today";
+	 char forecastDate[17] = "01 November 1970";
+	 char condition[31] = "überwiegend wolkig";
  };
 
   

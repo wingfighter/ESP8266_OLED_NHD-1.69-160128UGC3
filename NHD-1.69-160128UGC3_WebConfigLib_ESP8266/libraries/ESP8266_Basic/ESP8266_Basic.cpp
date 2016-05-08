@@ -182,8 +182,36 @@ void ESP8266_Basic::mqttBroker_Callback(char* topic, byte* payload, unsigned int
 		}
 	 }
   
+	// Weather Forecast Date -  from Yahoo
+	char subDateTopic[6] = "3/1/";  //Search for recieved screen 3/1/0-3/1/5
+	for (int i = 0; i < 6; i++ )
+	{
+	   subDateTopic[4] = i + '0';   
+  	   if (dissectResult.itemPath == subDateTopic )
+	   {
+	      //Store MQTT Payload to WeatherIcon struct
+	      for (int j=0; j < 17; j++ )  // May 15 characters from Yahoo Weather-Code + /0
+		  {
+		 	MyWeatherIcon[i].forecastDate[j] = value[j];
+		  }
+		}
+	 }
   
-  
+	// Weather Forecast condition -  from Yahoo
+	char subConditionTopic[6] = "3/2/";  //Search for recieved screen 3/1/0-3/1/5
+	for (int i = 0; i < 6; i++ )
+	{
+	   subConditionTopic[4] = i + '0';   
+  	   if (dissectResult.itemPath == subConditionTopic )
+	   {
+	      //Store MQTT Payload to WeatherIcon struct
+	      for (int j=0; j < 32 ; j++ )  // Max 32 characters from Yahoo Weather-Code + /0
+		  {
+		 	MyWeatherIcon[i].forecastDate[j] = value[j];
+		  }
+		}
+	 }
+   
   }
 }
 
@@ -370,6 +398,7 @@ void ESP8266_Basic::cfgChange_Callback(){
   Serial.println("incomming Callback, config has changed!!");
   printCFG();
   write_cfgFile();
+//  start_MQTT();
 };
 
 //===> WIFI SETUP <------------------------------------------------------------
@@ -445,7 +474,22 @@ bool MQTTOK = false;
 	sub += "/#";
 	mqtt_client.subscribe(sub.c_str());
     mqtt_client.loop();
-
+     
+    // register second subscribe if exists 
+	sub = cfg.mqttSecSub;
+  	if (sub.length() > 0) 
+	{
+		sub += "/#";
+		mqtt_client.subscribe(sub.c_str());
+		mqtt_client.loop();
+		Serial.print("MQTT subscribed: ");    Serial.println(sub.c_str());
+		sub = "/";
+		sub += cfg.mqttSecSub;
+		sub += "/#";
+		mqtt_client.subscribe(sub.c_str());
+		mqtt_client.loop();
+     	Serial.print("MQTT subscribed: ");    Serial.println(sub.c_str());
+    }
   }
   return MQTTOK;
 }
@@ -510,6 +554,7 @@ void ESP8266_Basic::resetSettings(){
   strcpy(cfg.mqttServer, "");
   strcpy(cfg.mqttPort, "1883");
   strcpy(cfg.mqttDeviceName, "");
+  strcpy(cfg.mqttSecSub, "");
   strcpy(cfg.updateServer, "");
   strcpy(cfg.filePath, "");
   strcpy(cfg.webNameScreen0, "");
@@ -654,14 +699,19 @@ bool ESP8266_Basic::read_cfgFile(){
     Serial.println("mounted file system");
     if (SPIFFS.exists("/config.json")) {
       //file exists, reading and loading
-      Serial.println("reading config file");
-//	  SPIFFS.remove("/config.json");
-//      return readOK;
-      File cfgFile = SPIFFS.open("/config.json", "r");
+  	  Serial.println("reading config file");
+
+	  // Remove config file 
+	  //SPIFFS.remove("/config.json");
+      //return readOK;   
+
+	  File cfgFile = SPIFFS.open("/config.json", "r");
       if (cfgFile) {
         Serial.println("opened config file");
         size_t size = cfgFile.size();
-        // Allocate a buffer to store contents of the file.
+		
+		
+		// Allocate a buffer to store contents of the file.
         std::unique_ptr<char[]> buf(new char[size]);
 
         cfgFile.readBytes(buf.get(), size);
@@ -672,6 +722,18 @@ bool ESP8266_Basic::read_cfgFile(){
           Serial.println("json success");
           
 		  //Get Data from File
+          strcpy(cfg.configSize, json["configSize"]);
+
+		  // file exist but new size => remove and return
+		  if (( atoi(cfg.configSize) - sizeof(CFG)) != 0)
+		  {
+              Serial.print("Size of old struct CFG: ");Serial.println(cfg.configSize);
+              Serial.print("Size of new struct CFG: ");Serial.println(sizeof(CFG));
+              Serial.println("New size -> remove config file");
+			  cfgFile.close();
+  		  	  SPIFFS.remove("/config.json");
+              return readOK;   // false
+	      }
           strcpy(cfg.webUser, json["webUser"]);
           strcpy(cfg.webPassword, json["webPassword"]);
           strcpy(cfg.apName, json["apName"]);
@@ -682,6 +744,7 @@ bool ESP8266_Basic::read_cfgFile(){
           strcpy(cfg.mqttServer, json["mqttServer"]);
           strcpy(cfg.mqttPort, json["mqttPort"]);
           strcpy(cfg.mqttDeviceName, json["mqttDeviceName"]);
+          strcpy(cfg.mqttSecSub, json["mqttSecSub"]);
           strcpy(cfg.updateServer, json["updateServer"]);
           strcpy(cfg.filePath, json["filePath"]);
           strcpy(cfg.webNameScreen0, json["webNameScreen0"]);
@@ -749,6 +812,9 @@ void ESP8266_Basic::write_cfgFile(){
 //  Serial.println("bevor write_cfgFile ");
 //  json.printTo(Serial);
 
+  sprintf(cfg.configSize, "%4d", sizeof(CFG));
+
+  json["configSize"] = cfg.configSize;
   json["webUser"] = cfg.webUser;
   json["webPassword"] = cfg.webPassword;
   json["apName"] = cfg.apName;
@@ -759,6 +825,7 @@ void ESP8266_Basic::write_cfgFile(){
   json["mqttServer"] = cfg.mqttServer;
   json["mqttPort"] = cfg.mqttPort;
   json["mqttDeviceName"] = cfg.mqttDeviceName;
+  json["mqttSecSub"] = cfg.mqttSecSub;
   json["updateServer"] = cfg.updateServer;
   json["filePath"] = cfg.filePath;
   json["webNameScreen0"] = cfg.webNameScreen0;
@@ -845,22 +912,23 @@ void ESP8266_Basic::printCFG(){
   Serial.println("");
   Serial.println("Config:");
   Serial.println("########################################");
-  Serial.print("WEBcfg Username:  "); Serial.println(cfg.webUser);
-  Serial.print("WEBcfg Password:  "); Serial.println(cfg.webPassword);
+  Serial.print("WEBcfg Username:      "); Serial.println(cfg.webUser);
+  Serial.print("WEBcfg Password:      "); Serial.println(cfg.webPassword);
   Serial.println("----------------------------------------");
-  Serial.print("AP SSID:          "); Serial.println(cfg.apName);
-  Serial.print("AP Password:      "); Serial.println(cfg.apPassword);
+  Serial.print("AP SSID:              "); Serial.println(cfg.apName);
+  Serial.print("AP Password:          "); Serial.println(cfg.apPassword);
   Serial.println("----------------------------------------");
-  Serial.print("WiFi SSID:        "); Serial.println(cfg.wifiSSID);
-  Serial.print("WiFi Password:    "); Serial.println(cfg.wifiPSK);
-  Serial.print("DHCP IP:          "); Serial.println(cfg.wifiIP);
+  Serial.print("WiFi SSID:            "); Serial.println(cfg.wifiSSID);
+  Serial.print("WiFi Password:        "); Serial.println(cfg.wifiPSK);
+  Serial.print("DHCP IP:              "); Serial.println(cfg.wifiIP);
   Serial.println("----------------------------------------");
-  Serial.print("MQTT-Server IP:   "); Serial.println(cfg.mqttServer);
-  Serial.print("MQTT-Server Port: "); Serial.println(cfg.mqttPort);
-  Serial.print("MQTT-DeviceName:  "); Serial.println(cfg.mqttDeviceName);
+  Serial.print("MQTT-Server IP:       "); Serial.println(cfg.mqttServer);
+  Serial.print("MQTT-Server Port:     "); Serial.println(cfg.mqttPort);
+  Serial.print("MQTT-DeviceName:      "); Serial.println(cfg.mqttDeviceName);
+  Serial.print("MQTT-Second Subscribe:"); Serial.println(cfg.mqttSecSub);
   Serial.println("----------------------------------------");
-  Serial.print("Update-Server IP: "); Serial.println(cfg.updateServer);
-  Serial.print("FilePath:         "); Serial.println(cfg.filePath);
+  Serial.print("Update-Server IP:     "); Serial.println(cfg.updateServer);
+  Serial.print("FilePath:             "); Serial.println(cfg.filePath);
   Serial.println("########################################");
 
 };

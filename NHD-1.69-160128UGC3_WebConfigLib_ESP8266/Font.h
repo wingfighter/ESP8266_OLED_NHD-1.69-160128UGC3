@@ -3258,13 +3258,63 @@ const uint8_t robotoLight_48ptBitmaps[] =
   0x00, 0x00, //                 
   0x00, 0x00, //                 
   0x00, 0x00, //                 
+
+  /* @2444 ' ' (8 pixels wide) */
+0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, //      
+  0x00, // 
+  0x00, // 
+  0x00, // 
+  0x00, // 
+  0x00, // 
+  0x00, //      
+ 
 };
 
 #define bigFontArrayInfo robotoLight_48ptDescriptors
 
 /* Character descriptors for Roboto Light 48pt */
 /* { [Char width in bytes], [Char height in bits], [Offset into robotoLight_48ptCharBitmaps in bytes] } */
-const uint16_t robotoLight_48ptDescriptors[140][3] = 
+const uint16_t robotoLight_48ptDescriptors[141][3] = 
 {
   {6, 47, 0},     /* % */ 
   {0, 0, 0},    /* & */ 
@@ -3406,6 +3456,8 @@ const uint16_t robotoLight_48ptDescriptors[140][3] =
   {0, 0, 0},    /* ® */ 
   {0, 0, 0},    /* ¯ */ 
   {2, 47, 2397},    /* ° */ 
+  {1, 47, 2444},    /*  */ //Space
+
 };
 
 /*===============================*/
