@@ -43,16 +43,11 @@ MARKDOWN LINKS & IMAGES - Definition siehe unten
     </li>
     <li>
       <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgements">Acknowledgements</a></li>
   </ol>
 </details>
 
@@ -76,7 +71,7 @@ MARKDOWN LINKS & IMAGES - Definition siehe unten
 
 <!-- GETTING STARTED -->
 ## Getting Started
-1. Wiring on Bradboard ![Product Name Screen Shot][bradboard]
+1. Wiring on Breadboard ![Product Name Screen Shot][breadboard]
 
 
 1. Download [Arduino-Sketch](https://github.com/wingfighter/ESP8266_OLED_NHD-1.69-160128UGC3/blob/master/NHD-1.69-160128UGC3_ESP8266_Temp_Hum/NHD-1.69-160128UGC3_ESP8266_Temp_Hum.ino)
@@ -117,4 +112,4 @@ Project Link: [https://github.com/wingfighter/ESP8266_OLED_NHD-1.69-160128UGC3](
 [license-shield]: https://img.shields.io/github/license/github_username/repo.svg?style=for-the-badge
 [license-url]: https://github.com/github_username/repo/blob/master/LICENSE.txt
 [product-screenshot]: images/C73064BF-917F-4002-BE14-3DAA1E7793B3.png
-[bradboard]: ESP8266_OLED_DHT22.png 
+[breadboard]: ESP8266_OLED_DHT22.png 
