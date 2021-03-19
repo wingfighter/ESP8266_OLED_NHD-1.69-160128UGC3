@@ -11,7 +11,7 @@ MARKDOWN LINKS & IMAGES - Definition siehe unten
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/github_username/repo_name">
+  <a href="https://github.com/wingfighter/ESP8266_OLED_NHD-1.69-160128UGC3">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
@@ -56,6 +56,9 @@ MARKDOWN LINKS & IMAGES - Definition siehe unten
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
+This demo implements an indoor temperature and humidity display with current time and date from an NTP server.
+The values are determined by a DHT22 and published via MQTT in addition to the local display.
+
 [![Product Name Screen Shot][product-screenshot]](https://www.amperestun.de)
 
 
@@ -95,21 +98,12 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## Contact
 
 
-Project Link: [https://github.com/wingfighter/ESP8266_OLED_NHD-1.69-160128UGC3](https://github.com/wingfighter/ESP8266_OLED_NHD-1.69-160128UGC3)
+Project Link: [Visit my side www.amperestun.de](https://www.amperestun.de)
 
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo.svg?style=for-the-badge
-[contributors-url]: https://github.com/github_username/repo/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/github_username/repo.svg?style=for-the-badge
-[forks-url]: https://github.com/github_username/repo/network/members
-[stars-shield]: https://img.shields.io/github/stars/github_username/repo.svg?style=for-the-badge
-[stars-url]: https://github.com/github_username/repo/stargazers
-[issues-shield]: https://img.shields.io/github/issues/github_username/repo.svg?style=for-the-badge
-[issues-url]: https://github.com/github_username/repo/issues
-[license-shield]: https://img.shields.io/github/license/github_username/repo.svg?style=for-the-badge
 [license-url]: https://github.com/github_username/repo/blob/master/LICENSE.txt
 [product-screenshot]: images/C73064BF-917F-4002-BE14-3DAA1E7793B3.png
 [breadboard]: ESP8266_OLED_DHT22.png 
